@@ -1,0 +1,9 @@
+{
+  "name": "budgeter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YNAB MCP server integration",
+  "dependencies": {
+    "ynab-mcp-server": "^0.1.2"
+  }
+}
