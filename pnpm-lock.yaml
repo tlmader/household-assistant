@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      ynab:
+        specifier: ^2.10.0
+        version: 2.10.0
       ynab-mcp-server:
         specifier: ^0.1.2
         version: 0.1.2(@modelcontextprotocol/sdk@0.6.1)
