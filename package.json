@@ -4,6 +4,7 @@
   "private": true,
   "description": "YNAB MCP server integration",
   "dependencies": {
+    "ynab": "^2.10.0",
     "ynab-mcp-server": "^0.1.2"
   }
 }
