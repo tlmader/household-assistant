@@ -1,4 +1,4 @@
-# YNAB Budgeter
+# Household assistant
 
 Read and manage your [YNAB](https://www.ynab.com/) budget from Claude Code. Two local MCP servers expose your accounts, categories, income, goals, and transactions, and a dozen finance skills turn that data into net-worth statements, debt-payoff plans, spending reviews, and subscription audits.
 
@@ -36,11 +36,11 @@ Then ask Claude "what's my net worth?", "plan my debt payoff", or "find unused s
 
 ## Why two MCP servers
 
-`budget_summary` from the vendored [`ynab-mcp-server`](https://github.com/calebl/ynab-mcp-server) returns accounts, balances, categories, income, and goals — enough for most skills. But that server can't read posted transactions: its one transaction-read tool is fixed to return only *unapproved* transactions. Skills that search by payee or date — subscriptions, donations, insurance, tax payments — need the full history.
+`budget_summary` from the [`ynab-mcp-server`](https://github.com/calebl/ynab-mcp-server) dependency returns accounts, balances, categories, income, and goals — enough for most skills. But that server can't read posted transactions: its one transaction-read tool is fixed to return only *unapproved* transactions. Skills that search by payee or date — subscriptions, donations, insurance, tax payments — need the full history.
 
-So this repo adds `ynab-transactions`, a small stdio server that exposes the reads the vendored one omits. Together they cover the whole surface the skills depend on.
+So this repo adds `ynab-transactions`, a small stdio server that exposes the reads the dependency omits. Together they cover the whole surface the skills depend on.
 
-**Run the vendored server from its real path, not `npx`.** Under `npx`, its framework resolves the tools directory from the `.bin` symlink and loads zero tools. The setup above runs it from `node_modules` to avoid that.
+**Run `ynab-mcp-server` from its real path, not `npx`.** Under `npx`, its framework resolves the tools directory from the `.bin` symlink and loads zero tools. The setup above runs it from `node_modules` to avoid that.
 
 | Server | Tools |
 | --- | --- |
@@ -82,3 +82,10 @@ mcp-servers/
   ynab-transactions/    the in-repo transaction server
 CLAUDE.md               project instructions and the YNAB data surface
 ```
+
+## License
+
+This project is released under the [MIT License](LICENSE). The bundled skills are
+adapted from [openaccountant/skills](https://github.com/openaccountant/skills) and
+[mattpocock/skills](https://github.com/mattpocock/skills), both MIT-licensed; their
+copyright and permission notices are reproduced in [NOTICE](NOTICE).

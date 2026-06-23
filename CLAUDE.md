@@ -1,4 +1,4 @@
-# Budgeter
+# Household assistant
 
 This project integrates the [YNAB MCP server](https://github.com/calebl/ynab-mcp-server) so Claude can read and manage YNAB budgets.
 
@@ -16,9 +16,9 @@ Configure your own YNAB budgets. The `YNAB_BUDGET_ID` env var (set in `~/.claude
 
 Two local-scope stdio servers (configured in `~/.claude.json`, not committed; `YNAB_API_TOKEN` lives there only):
 
-1. **`ynab-mcp-server`** (vendored `calebl/ynab-mcp-server`) — launched via the real install path, **not** npx: `node node_modules/ynab-mcp-server/dist/index.js`. Running it through `npx` loads **0 tools** (the framework resolves its tools dir from the `.bin` symlink), which is why the package is vendored locally.
+1. **`ynab-mcp-server`** (the `calebl/ynab-mcp-server` npm dependency) — launched from its real install path, **not** npx: `node node_modules/ynab-mcp-server/dist/index.js`. Running it through `npx` loads **0 tools** (the framework resolves its tools dir from the `.bin` symlink), so it must be run from `node_modules` directly.
    - Tools: `list_budgets`, `budget_summary`, `get_unapproved_transactions`, `create_transaction`, `approve_transaction`.
-2. **`ynab-transactions`** (in-repo, `mcp-servers/ynab-transactions/index.mjs`) — a small hand-rolled stdio server exposing the transaction reads the vendored server omits, backed by the `ynab` SDK.
+2. **`ynab-transactions`** (in-repo, `mcp-servers/ynab-transactions/index.mjs`) — a small hand-rolled stdio server exposing the transaction reads the dependency omits, backed by the `ynab` SDK.
    - Tools: `list_transactions`, `transactions_by_category`.
 
 New MCP tools only appear after a Claude Code session reload.

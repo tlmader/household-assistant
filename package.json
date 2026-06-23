@@ -1,8 +1,10 @@
 {
-  "name": "budgeter",
+  "name": "household-assistant",
   "version": "1.0.0",
   "private": true,
-  "description": "YNAB MCP server integration",
+  "description": "YNAB-backed household finance assistant for Claude Code",
+  "license": "MIT",
+  "author": "Ted Mader <2181467+tlmader@users.noreply.github.com>",
   "dependencies": {
     "ynab": "^2.10.0",
     "ynab-mcp-server": "^0.1.2"
