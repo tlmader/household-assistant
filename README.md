@@ -49,7 +49,7 @@ So this repo adds `ynab-transactions`, a small stdio server that exposes the rea
 
 ## Skills
 
-Twelve finance skills, adapted from [openaccountant/skills](https://github.com/openaccountant/skills) to run on YNAB. Each one falls back to a manual procedure when YNAB can't supply the data. Claude invokes them on its own when your request matches:
+Twelve finance skills, installed from [openaccountant/skills `personal/`](https://github.com/openaccountant/skills/tree/main/personal) and modified to run on YNAB. Each one falls back to a manual procedure when YNAB can't supply the data. Claude invokes them on its own when your request matches:
 
 | Skill | What it does |
 | --- | --- |
