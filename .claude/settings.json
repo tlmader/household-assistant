@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "openaccountants": {
+      "source": {
+        "source": "github",
+        "repo": "openaccountants/openaccountants"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "openaccountants@openaccountants": true
+  }
+}
