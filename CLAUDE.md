@@ -14,12 +14,14 @@ Configure your own YNAB budgets. The `YNAB_BUDGET_ID` env var (set in `~/.claude
 
 ## MCP servers
 
-Two local-scope stdio servers (configured in `~/.claude.json`, not committed; `YNAB_API_TOKEN` lives there only):
+Three local stdio servers, configured in the project-scoped **`.mcp.json`** (committed — it references env vars only, no secrets). Supply the secrets via your shell environment and launch Claude Code from a shell where they're exported: `YNAB_API_TOKEN`, `YNAB_BUDGET_ID`, `WAVE_FULL_ACCESS_TOKEN` (optional `WAVE_BUSINESS_ID`). Do **not** also define these servers in `~/.claude.json` — that double-registers them.
 
 1. **`ynab-mcp-server`** (the `calebl/ynab-mcp-server` npm dependency) — launched from its real install path, **not** npx: `node node_modules/ynab-mcp-server/dist/index.js`. Running it through `npx` loads **0 tools** (the framework resolves its tools dir from the `.bin` symlink), so it must be run from `node_modules` directly.
    - Tools: `list_budgets`, `budget_summary`, `get_unapproved_transactions`, `create_transaction`, `approve_transaction`.
 2. **`ynab-transactions`** (in-repo, `mcp-servers/ynab-transactions/index.mjs`) — a small hand-rolled stdio server exposing the transaction reads the dependency omits, backed by the `ynab` SDK.
    - Tools: `list_transactions`, `transactions_by_category`.
+3. **`wave`** (in-repo, `mcp-servers/wave/index.mjs`) — a hand-rolled **read-only** stdio server over Wave's public GraphQL API (`gql.waveapps.com/graphql/public`), for your Wave business books. No deps (global `fetch`). Reads a Wave **full access token** from `WAVE_FULL_ACCESS_TOKEN` and an optional default business id from `WAVE_BUSINESS_ID`. Read-only by construction: the `graphql` tool **rejects any `mutation`**, so it can never write to the books.
+   - Tools: `list_businesses`, `graphql` (read-only query passthrough — introspect the schema with a `__schema` query to discover fields).
 
 New MCP tools only appear after a Claude Code session reload.
 
