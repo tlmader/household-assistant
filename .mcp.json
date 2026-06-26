@@ -11,6 +11,10 @@
     "wave": {
       "command": "node",
       "args": ["mcp-servers/wave/index.mjs"]
+    },
+    "snaptrade": {
+      "type": "http",
+      "url": "https://mcp.snaptrade.com/mcp"
     }
   }
 }
