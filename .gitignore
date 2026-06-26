@@ -5,3 +5,7 @@ logs/
 .env.*
 !.env.example
 .claude/settings.local.json
+
+# Local scratch and personal data — never commit
+.tmp-va/
+*va-blue-button*

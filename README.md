@@ -1,12 +1,18 @@
 # Household assistant
 
-Read and manage your [YNAB](https://www.ynab.com/) budget from Claude Code. Two local MCP servers expose your accounts, categories, income, goals, and transactions, and a dozen finance skills turn that data into net-worth statements, debt-payoff plans, spending reviews, and subscription audits.
+A working example of a household assistant built on [Claude Code](https://claude.com/claude-code). It reads your real household finances — [YNAB](https://www.ynab.com/) budgets, [Wave](https://www.waveapps.com/) books, and Fidelity holdings — and bundles finance, Google Workspace, and productivity skills, so you can ask questions and plan: "what's my net worth?", "plan my debt payoff", "find unused subscriptions", "draft this week's agenda".
 
-Your YNAB token stays in your local Claude config. Only the API calls to YNAB leave your machine.
+Your secrets stay on your machine. The MCP servers read tokens from your local environment and call out only to the services you connect.
+
+## Why this exists
+
+Most personal-finance automation lives behind a dashboard you can't read or extend. This repo is the opposite: a small Claude Code project you clone, point at your own accounts, and change. It shows how to wire MCP servers and skills into one assistant that answers household questions and helps you plan — net worth, spending, taxes, subscriptions, calendars, documents — without handing your data to a third party.
+
+Treat it as a reference, not a product. Read the code, keep what fits, replace the rest.
 
 ## Setup
 
-You need Node, [pnpm](https://pnpm.io/), and a YNAB account. Run these from the repo root.
+You need [Node](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/), and a YNAB account. Run these from the repo root.
 
 1. Install dependencies:
 
@@ -16,40 +22,43 @@ You need Node, [pnpm](https://pnpm.io/), and a YNAB account. Run these from the 
 
 2. Create a YNAB personal access token at <https://app.ynab.com/settings/developer>.
 
-3. Register both MCP servers. Local scope keeps the token in `~/.claude.json`, out of the repo:
+3. Supply your secrets. The four MCP servers are already registered in the committed `.mcp.json` — you do **not** run `claude mcp add`. Instead, put your tokens where Claude Code can read them: either export them in the shell you launch Claude Code from, or add an `"env"` block to `.claude/settings.local.json` (gitignored). Copy [`.env.example`](.env.example) for the full list. The minimum:
 
-   ```bash
-   claude mcp add ynab-mcp-server \
-     -e YNAB_API_TOKEN=<your-token> \
-     -- node node_modules/ynab-mcp-server/dist/index.js
-
-   claude mcp add ynab-transactions \
-     -e YNAB_API_TOKEN=<your-token> \
-     -- node mcp-servers/ynab-transactions/index.mjs
+   ```jsonc
+   // .claude/settings.local.json
+   { "env": { "YNAB_API_TOKEN": "…", "YNAB_BUDGET_ID": "…" } }
    ```
-
-   To default to one budget, add `-e YNAB_BUDGET_ID=<budget-id>` to each command. Run the `list_budgets` tool to find your budget IDs.
 
 4. Reload Claude Code. MCP tools and skills register on reload.
 
+5. (Optional) Connect Fidelity. Run `/mcp`, pick `snaptrade`, and approve read-only access in the browser. SnapTrade uses OAuth, so it needs no token in your config.
+
 Then ask Claude "what's my net worth?", "plan my debt payoff", or "find unused subscriptions".
 
-## Why two MCP servers
+## What's connected
 
-`budget_summary` from the [`ynab-mcp-server`](https://github.com/calebl/ynab-mcp-server) dependency returns accounts, balances, categories, income, and goals — enough for most skills. But that server can't read posted transactions: its one transaction-read tool is fixed to return only *unapproved* transactions. Skills that search by payee or date — subscriptions, donations, insurance, tax payments — need the full history.
+Four MCP servers, registered in [`.mcp.json`](.mcp.json):
 
-So this repo adds `ynab-transactions`, a small stdio server that exposes the reads the dependency omits. Together they cover the whole surface the skills depend on.
+| Server | Where it lives | Access | What it reads |
+| --- | --- | --- | --- |
+| `ynab-mcp-server` | npm dependency | read + create | Budgets, accounts, categories, income, goals, unapproved transactions |
+| `ynab-transactions` | in-repo | read-only | Posted transactions by date or category — the reads the dependency omits |
+| `wave` | in-repo | read-only | Wave accounting books, over the public GraphQL API |
+| `snaptrade` | hosted, OAuth | read-only | Connected brokerage accounts (Fidelity) — balances, positions, activity |
 
-**Run `ynab-mcp-server` from its real path, not `npx`.** Under `npx`, its framework resolves the tools directory from the `.bin` symlink and loads zero tools. The setup above runs it from `node_modules` to avoid that.
+Claude creates only *unapproved* YNAB transactions; it never approves them or moves money (see [Conventions](#conventions)). The `wave` and `snaptrade` servers are read-only by construction — `wave` rejects any GraphQL `mutation`, and SnapTrade exposes no write tools.
 
-| Server | Tools |
-| --- | --- |
-| `ynab-mcp-server` | `list_budgets`, `budget_summary`, `get_unapproved_transactions`, `create_transaction`, `approve_transaction` |
-| `ynab-transactions` | `list_transactions`, `transactions_by_category` |
+### Why two YNAB servers
+
+`budget_summary` from the [`ynab-mcp-server`](https://github.com/calebl/ynab-mcp-server) dependency returns accounts, balances, categories, income, and goals — enough for most skills. But its one transaction-read tool returns only *unapproved* transactions, so skills that search by payee or date — subscriptions, donations, insurance, tax payments — can't see your history. The in-repo `ynab-transactions` server adds those reads. Together they cover the surface the skills depend on.
+
+Run `ynab-mcp-server` from its real path, not `npx`. Under `npx`, its framework resolves the tools directory from the `.bin` symlink and loads zero tools. `.mcp.json` runs it from `node_modules` to avoid that.
 
 ## Skills
 
-Twelve finance skills, installed from [openaccountant/skills `personal/`](https://github.com/openaccountant/skills/tree/main/personal) and modified to run on YNAB. Each one falls back to a manual procedure when YNAB can't supply the data. Claude invokes them on its own when your request matches:
+Claude invokes most skills on its own when your request matches. They fall into three groups.
+
+**Finance (12)** — adapted from [`openaccountant/skills`](https://github.com/openaccountant/skills) (`personal/`) and rewired to run on YNAB. Each falls back to a manual procedure when YNAB can't supply the data.
 
 | Skill | What it does |
 | --- | --- |
@@ -66,26 +75,36 @@ Twelve finance skills, installed from [openaccountant/skills `personal/`](https:
 | `state-tax-estimator` | State income tax from income and state of residence |
 | `tax-penalty-calc` | IRS underpayment penalty (Form 2210) |
 
-A thirteenth skill, [`writing-great-skills`](https://github.com/mattpocock/skills), is a reference for authoring skills. Invoke it by name with `/writing-great-skills`; Claude won't trigger it on its own.
+**Google Workspace (44)** — the `gws-*` skills, from [`googleworkspace/cli`](https://github.com/googleworkspace/cli). They drive Gmail, Calendar, Drive, Sheets, Docs, Chat, Tasks, and more through a `gws` command-line tool, plus cross-service workflows (meeting prep, weekly digest, email-to-task). They need the `gws` binary on your `PATH` — see the [googleworkspace/cli](https://github.com/googleworkspace/cli) install instructions.
+
+**Productivity (5)** — from [`mattpocock/skills`](https://github.com/mattpocock/skills): `grill-me` and `grilling` stress-test a plan before you build it, `handoff` writes a session handoff, `teach` runs a teaching loop, and `writing-great-skills` is a reference for authoring skills. Invoke these by name; Claude won't trigger them on its own.
 
 The finance skills give estimates, not tax or financial advice. Check anything that matters with a professional.
 
 ## Conventions
 
-Claude reads, summarizes, categorizes, and creates *unapproved* transactions. It does not approve transactions or move money — you do that yourself.
+Claude reads, summarizes, categorizes, and creates *unapproved* transactions. It does not approve transactions or move money — you do that yourself. Headings and filenames use sentence case; proper nouns keep their casing.
+
+## Personal data vault (optional)
+
+Point Claude at a local source of truth — for example an Obsidian vault with one structured note per account, policy, or asset — by setting `PERSONAL_VAULT_PATH`. When set, Claude reads the vault first for finance and records questions and refreshes it from the underlying sources (YNAB, portals) when a note goes stale. See [CLAUDE.md](CLAUDE.md) for the full data surface the skills build on.
 
 ## Layout
 
 ```
-.claude/skills/         the 13 skills
+.claude/skills/         finance, Google Workspace (gws-*), and productivity skills
 mcp-servers/
-  ynab-transactions/    the in-repo transaction server
+  ynab-transactions/    in-repo YNAB transaction reads
+  wave/                 in-repo read-only Wave GraphQL server
+.mcp.json               registers the four MCP servers
+.env.example            the secrets each server expects
 CLAUDE.md               project instructions and the YNAB data surface
 ```
 
+## Security
+
+Never commit tokens. Secrets belong in your shell environment or `.claude/settings.local.json`, both kept out of git. See [SECURITY.md](SECURITY.md) for how secrets are handled and how to report a problem.
+
 ## License
 
-This project is released under the [MIT License](LICENSE). The bundled skills are
-adapted from [openaccountant/skills](https://github.com/openaccountant/skills) and
-[mattpocock/skills](https://github.com/mattpocock/skills), both MIT-licensed; their
-copyright and permission notices are reproduced in [NOTICE](NOTICE).
+Released under the [MIT License](LICENSE). The bundled skills are vendored from [`openaccountant/skills`](https://github.com/openaccountant/skills) (MIT), [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT), and [`googleworkspace/cli`](https://github.com/googleworkspace/cli) (Apache-2.0); their license and attribution notices are reproduced in [NOTICE](NOTICE).
