@@ -14,7 +14,7 @@ Configure your own YNAB budgets. The `YNAB_BUDGET_ID` env var (set in `~/.claude
 
 ## MCP servers
 
-Three local stdio servers, configured in the project-scoped **`.mcp.json`** (committed — it references env vars only, no secrets). Supply the secrets via your shell environment and launch Claude Code from a shell where they're exported: `YNAB_API_TOKEN`, `YNAB_BUDGET_ID`, `WAVE_FULL_ACCESS_TOKEN` (optional `WAVE_BUSINESS_ID`). Do **not** also define these servers in `~/.claude.json` — that double-registers them.
+Three local stdio servers plus SnapTrade's hosted server, configured in the project-scoped **`.mcp.json`** (committed — no secrets: the local servers reference env vars only, and SnapTrade authenticates over OAuth). Supply the local secrets via your shell environment or the gitignored `settings.local.json` `"env"` block: `YNAB_API_TOKEN`, `YNAB_BUDGET_ID`, `WAVE_FULL_ACCESS_TOKEN` (optional `WAVE_BUSINESS_ID`). Do **not** also define these servers in `~/.claude.json` — that double-registers them.
 
 1. **`ynab-mcp-server`** (the `calebl/ynab-mcp-server` npm dependency) — launched from its real install path, **not** npx: `node node_modules/ynab-mcp-server/dist/index.js`. Running it through `npx` loads **0 tools** (the framework resolves its tools dir from the `.bin` symlink), so it must be run from `node_modules` directly.
    - Tools: `list_budgets`, `budget_summary`, `get_unapproved_transactions`, `create_transaction`, `approve_transaction`.
@@ -22,6 +22,9 @@ Three local stdio servers, configured in the project-scoped **`.mcp.json`** (com
    - Tools: `list_transactions`, `transactions_by_category`.
 3. **`wave`** (in-repo, `mcp-servers/wave/index.mjs`) — a hand-rolled **read-only** stdio server over Wave's public GraphQL API (`gql.waveapps.com/graphql/public`), for your Wave business books. No deps (global `fetch`). Reads a Wave **full access token** from `WAVE_FULL_ACCESS_TOKEN` and an optional default business id from `WAVE_BUSINESS_ID`. Read-only by construction: the `graphql` tool **rejects any `mutation`**, so it can never write to the books.
    - Tools: `list_businesses`, `graphql` (read-only query passthrough — introspect the schema with a `__schema` query to discover fields).
+4. **`snaptrade`** (hosted, [`https://mcp.snaptrade.com/mcp`](https://docs.snaptrade.com/docs/mcp-server)) — SnapTrade's official **read-only** MCP server over connected brokerage accounts (Fidelity). Streamable HTTP transport, authenticated with OAuth 2.0 + PKCE — no local code, no API keys, no env vars. Read-only by design: it reads balances, positions, orders, and activity and can generate a brokerage-connection link, but cannot place trades, move money, or change settings.
+   - Tools (18, across four groups): connections (list brokerages and accounts), account information (balances, positions, orders, activity), reference data (currencies, exchange rates, security types), and connection helpers (generate a connect link).
+   - **One-time setup** — the account owner authenticates, never the agent: reload Claude Code so the server registers, then run `/mcp`, pick `snaptrade`, and approve read-only access in the browser (OAuth registers the client automatically). Fidelity must be connected inside the SnapTrade account — use the connection-helper tool to generate a link if it isn't.
 
 New MCP tools only appear after a Claude Code session reload.
 
