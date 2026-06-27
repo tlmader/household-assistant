@@ -12,12 +12,12 @@ description: >
 Builds a zero-based budget where every dollar of income is assigned a job — spending, saving, or debt repayment — until nothing is left unassigned. YNAB is itself a zero-based tool, so this skill reads the live budget, confirms whether it already balances to zero, and reworks per-category allocations against the 50/30/20 guideline.
 
 ## YNAB tools
-- `budget_summary` — call with `{month: 'current'}`. Read `monthBudget.income` for monthly income, `monthBudget.to_be_budgeted` for the zero-based check, and `categories[]` (`budgeted`, `activity`, `balance`, `category_group_name`) to build the plan and spot overspending. All amounts from `budget_summary` are in **milliunits — divide by 1000** for dollars.
+- `ynab_budget_summary` — call with `{month: 'current'}`. Read `monthBudget.income` for monthly income, `monthBudget.to_be_budgeted` for the zero-based check, and `monthBudget.categories` (`budgeted`, `activity`, `balance`, `category_group_name`) to build the plan and spot overspending. All amounts from `ynab_budget_summary` are in **milliunits — divide by 1000** for dollars.
 
 ## Workflow
-1. Run `budget_summary({month: 'current'})`. Set Income = `monthBudget.income / 1000`. This is the planning baseline. Checkable result: a dollar income figure.
+1. Run `ynab_budget_summary({month: 'current'})`. Set Income = `monthBudget.income / 1000`. This is the planning baseline. Checkable result: a dollar income figure.
 2. Compute the zero-based check: `to_be_budgeted = monthBudget.to_be_budgeted / 1000`. If it is `$0`, the budget is already fully assigned; if positive, that amount is still unassigned; if negative, the budget is over-assigned. Checkable result: a stated to-be-budgeted dollar amount and one of {balanced / under-assigned / over-assigned}.
-3. For each entry in `categories[]`, compute budgeted = `budgeted / 1000` and actual = `abs(activity) / 1000`. Flag any category where `balance < 0` as overspent. Checkable result: a per-category list of budgeted vs actual, plus the set of overspent categories.
+3. For each entry in `monthBudget.categories` **with `hidden` and `deleted` both false** (the tool returns them unfiltered, including the internal "Ready to Assign" row, which would otherwise false-flag as overspent), compute budgeted = `budgeted / 1000` and actual = `abs(activity) / 1000`. Flag any category where `balance < 0` as overspent. Checkable result: a per-category list of budgeted vs actual, plus the set of overspent categories.
 4. Map each category into NEEDS / WANTS / SAVINGS & DEBT using its `category_group_name` and build the budget from these real categories:
 
    ```
