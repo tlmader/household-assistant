@@ -12,14 +12,14 @@ description: >
 Scan transaction history for recurring charges, total monthly and annual subscription spend, and rank cancellation candidates by cost so the user can decide what to drop.
 
 ## YNAB tools
-- `list_transactions` — pull posted transactions (newest-first) over a long window to catch both monthly and annual subscriptions. Amounts are already in dollars.
-- `transactions_by_category` — if a "Subscriptions" category exists, scope transactions to that category id to cross-check the payee-based detection. Amounts are already in dollars.
+- `ynab_get_transactions` — pull posted transactions over a long window to catch both monthly and annual subscriptions. Pass `limit: 100000` (the default of 100 silently drops most rows). Results come back ascending (oldest-first); sort by `date` descending if you need newest-first for display. Each `amount` is a string in dollars (already divided by 1000) — coerce with `Number(amount)` before any math; do not divide by 1000.
+- `ynab_get_transactions` (with `categoryId`) — if a "Subscriptions" category exists, scope transactions to that category id to cross-check the payee-based detection. Pass `limit: 100000` here too. Each `amount` is a string in dollars — coerce with `Number(amount)` before any math; do not divide by 1000.
 
 ## Workflow
-1. Call `list_transactions({sinceDate})` with `sinceDate` ~18 months ago (e.g. an ISO date 18 months before today). The long window catches annual subscriptions that a 6-month look-back would miss. Result: a list of dated, dollar-denominated transactions.
+1. Call `ynab_get_transactions({sinceDate, limit: 100000})` with `sinceDate` ~18 months ago (e.g. an ISO date 18 months before today). The long window catches annual subscriptions that a 6-month look-back would miss; the large `limit` avoids silently dropping rows. Result: a list of dated transactions, ascending by date, with each `amount` a string in dollars — coerce with `Number(amount)` before summing.
 2. Group the rows by `payee_name`. Result: one bucket per merchant with its charge dates and amounts.
 3. Flag a payee as a subscription when it recurs at a regular cadence (monthly, quarterly, or annual) with a consistent amount. Compute each subscription's normalized monthly cost (annual ÷ 12, quarterly ÷ 3). Result: a list of confirmed subscriptions, each with cadence, charge amount, and monthly cost.
-4. If a `categories[]` entry named "Subscriptions" (or similar) exists, call `transactions_by_category({categoryId})` for it and reconcile against the payee list. Result: any subscription present in the category but missed in step 3, and vice versa, is accounted for.
+4. If a `monthBudget.categories` entry named "Subscriptions" (or similar) exists, call `ynab_get_transactions({categoryId, limit: 100000})` for it and reconcile against the payee list. Result: any subscription present in the category but missed in step 3, and vice versa, is accounted for.
 5. Sum the normalized monthly costs to produce total monthly spend, then ×12 for the annualized total. Result: two dollar figures.
 6. Render the dashboard below, sorted by annual cost descending. Result: a complete table with a totals line.
 

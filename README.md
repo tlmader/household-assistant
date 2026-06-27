@@ -22,7 +22,7 @@ You need [Node](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/), and a YNAB a
 
 2. Create a YNAB personal access token at <https://app.ynab.com/settings/developer>.
 
-3. Supply your secrets. The four MCP servers are already registered in the committed `.mcp.json` — you do **not** run `claude mcp add`. Instead, put your tokens where Claude Code can read them: either export them in the shell you launch Claude Code from, or add an `"env"` block to `.claude/settings.local.json` (gitignored). Copy [`.env.example`](.env.example) for the full list. The minimum:
+3. Supply your secrets. The three MCP servers are already registered in the committed `.mcp.json` — you do **not** run `claude mcp add`. Instead, put your tokens where Claude Code can read them: either export them in the shell you launch Claude Code from, or add an `"env"` block to `.claude/settings.local.json` (gitignored). Copy [`.env.example`](.env.example) for the full list. The minimum:
 
    ```jsonc
    // .claude/settings.local.json
@@ -37,22 +37,21 @@ Then ask Claude "what's my net worth?", "plan my debt payoff", or "find unused s
 
 ## What's connected
 
-Four MCP servers, registered in [`.mcp.json`](.mcp.json):
+Three MCP servers, registered in [`.mcp.json`](.mcp.json):
 
 | Server | Where it lives | Access | What it reads |
 | --- | --- | --- | --- |
-| `ynab-mcp-server` | npm dependency | read + create | Budgets, accounts, categories, income, goals, unapproved transactions |
-| `ynab-transactions` | in-repo | read-only | Posted transactions by date or category — the reads the dependency omits |
+| `ynab-mcp-server` | git dependency (pinned commit) | read + create | Budgets, accounts, categories, income, goals, and transactions by date, account, category, or payee |
 | `wave` | in-repo | read-only | Wave accounting books, over the public GraphQL API |
 | `snaptrade` | hosted, OAuth | read-only | Connected brokerage accounts (Fidelity) — balances, positions, activity |
 
-Claude creates only *unapproved* YNAB transactions; it never approves them or moves money (see [Conventions](#conventions)). The `wave` and `snaptrade` servers are read-only by construction — `wave` rejects any GraphQL `mutation`, and SnapTrade exposes no write tools.
+Claude creates only *unapproved* YNAB transactions; it never approves, updates, deletes, imports, or bulk-approves them, and never moves money (see [Conventions](#conventions)) — even though the pinned `ynab-mcp-server` commit registers write tools for all of those. The `wave` and `snaptrade` servers are read-only by construction — `wave` rejects any GraphQL `mutation`, and SnapTrade exposes no write tools.
 
-### Why two YNAB servers
+### The YNAB server
 
-`budget_summary` from the [`ynab-mcp-server`](https://github.com/calebl/ynab-mcp-server) dependency returns accounts, balances, categories, income, and goals — enough for most skills. But its one transaction-read tool returns only *unapproved* transactions, so skills that search by payee or date — subscriptions, donations, insurance, tax payments — can't see your history. The in-repo `ynab-transactions` server adds those reads. Together they cover the surface the skills depend on.
+One server covers the whole YNAB surface the skills depend on. `ynab_budget_summary` from the [`ynab-mcp-server`](https://github.com/calebl/ynab-mcp-server) dependency returns accounts, balances, categories, income, and goals; `ynab_get_transactions` returns register transactions filtered by date, account, category, or payee, so skills that search by payee or date — subscriptions, donations, insurance, tax payments — can see your full history.
 
-Run `ynab-mcp-server` from its real path, not `npx`. Under `npx`, its framework resolves the tools directory from the `.bin` symlink and loads zero tools. `.mcp.json` runs it from `node_modules` to avoid that.
+`.mcp.json` launches the server from its built entrypoint, `node node_modules/ynab-mcp-server/dist/index.js`. Because the dependency is pinned to a git commit, pnpm builds its TypeScript to `dist/` on install (via the `onlyBuiltDependencies` allowlist in `pnpm-workspace.yaml`); the launch path points straight at that build.
 
 ## Skills
 
@@ -83,7 +82,7 @@ The finance skills give estimates, not tax or financial advice. Check anything t
 
 ## Conventions
 
-Claude reads, summarizes, categorizes, and creates *unapproved* transactions. It does not approve transactions or move money — you do that yourself. Headings and filenames use sentence case; proper nouns keep their casing.
+Claude reads, summarizes, categorizes, and creates *unapproved* transactions. It does not approve, update, delete, import, or bulk-approve transactions, edit category budgets, or move money — you do that yourself, even though the YNAB server exposes tools for all of them. Headings and filenames use sentence case; proper nouns keep their casing.
 
 ## Personal data vault (optional)
 
@@ -94,9 +93,8 @@ Point Claude at a local source of truth — for example an Obsidian vault with o
 ```
 .claude/skills/         finance, Google Workspace (gws-*), and productivity skills
 mcp-servers/
-  ynab-transactions/    in-repo YNAB transaction reads
   wave/                 in-repo read-only Wave GraphQL server
-.mcp.json               registers the four MCP servers
+.mcp.json               registers the three MCP servers
 .env.example            the secrets each server expects
 CLAUDE.md               project instructions and the YNAB data surface
 ```

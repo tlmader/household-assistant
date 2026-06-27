@@ -12,10 +12,10 @@ description: >
 Builds a net worth statement directly from YNAB account balances: assets minus liabilities. No user input is needed for accounts YNAB already tracks; you only ask about assets YNAB does not see (home value, vehicles, etc.).
 
 ## YNAB tools
-- `budget_summary({month: 'current'})` — returns `accounts[]` with `name`, `type`, `balance`, and `closed`. This is the sole data source: assets, liabilities, and net worth all come from these balances. Every `balance` is in **milliunits — divide by 1000 for dollars.**
+- `ynab_budget_summary({month: 'current'})` — returns `accounts[]` with `name`, `type`, and `balance`. This is the sole data source: assets, liabilities, and net worth all come from these balances. The tool already excludes closed and deleted accounts, so a closed account still holding a balance won't appear here — pull that from the vault or the account portal if you need it. Every `balance` is in **milliunits — divide by 1000 for dollars.**
 
 ## Workflow
-1. Call `budget_summary({month: 'current'})` and take `accounts[]`. Drop any account where `closed` is true. Result: a list of open accounts with name, type, and balance.
+1. Call `ynab_budget_summary({month: 'current'})` and take `accounts[]` (the tool has already dropped closed and deleted accounts). Result: a list of open accounts with name, type, and balance.
 2. Classify each account by `type`:
    - **Assets** (`checking`, `savings`, `cash`, `otherAsset`): balances are positive. Convert each to dollars (`balance / 1000`).
    - **Liabilities** (`creditCard`, `lineOfCredit`, `mortgage`, `autoLoan`, `studentLoan`, `medicalDebt`, `otherLiability`, `otherDebt`): balances are negative. Show them as positive amounts owed (`-balance / 1000`).

@@ -12,12 +12,12 @@ description: >
 Finds charitable donations in your transaction history, totals annual giving by organization, classifies each as deductible or not, and estimates the tax deduction value. Helps you plan giving and prepare for tax season.
 
 ## YNAB tools
-- `list_transactions` — pull posted transactions since the start of the tax year (`sinceDate`); filter rows yourself by `payee_name`, `memo`, or `category_name` to find donations, then group by `payee_name` and sum the `amount` field for per-organization totals. `amount` is already in dollars (no conversion needed).
+- `ynab_get_transactions` — pull posted transactions since the start of the tax year (`sinceDate`); always pass `limit: 100000` so you get the full window — the default limit is 100, which silently returns only the oldest rows and drops everything newer. Filter rows yourself by `payee_name`, `memo`, or `category_name` to find donations, then group by `payee_name` and sum the `amount` field for per-organization totals. `amount` is a STRING in dollars (e.g. `"-3760.14"`) — coerce it with `Number(amount)` before any sum or comparison, and do NOT divide by 1000 (it is already dollars). Rows come back ascending by date (oldest first).
 
 ## Workflow
-1. Call `list_transactions({ sinceDate: "<Jan 1 of the tax year>" })`. Result is the posted transaction list, newest first.
+1. Call `ynab_get_transactions({ sinceDate: "<Jan 1 of the tax year>", limit: 100000 })`. Result is the posted transaction list, ascending by date (oldest first) — sort by `date` descending client-side if you present rows newest-first.
 2. Filter the rows to charitable ones. A row counts if its `payee_name` or `memo` matches giving keywords — donation, charity, charitable, church, tithe, nonprofit, 501c3, foundation, ministry, United Way, Red Cross, Salvation Army, Habitat, food bank, humane society, GoFundMe, donor, giving — OR its `category_name` is a giving/donations category. Result: a filtered list of donation rows.
-3. Group the filtered rows by `payee_name` and sum each group's `amount` (already dollars) for a per-organization total. Result: one total per organization.
+3. Group the filtered rows by `payee_name` and sum each group's `amount` for a per-organization total — coerce each `amount` with `Number(amount)` first (it is a string in dollars; do NOT divide by 1000). Result: one total per organization.
 4. Classify each organization as likely tax-deductible or not:
    - Deductible: donations to registered 501(c)(3) organizations (most churches, charities, foundations).
    - NOT deductible: GoFundMe for individuals, political campaigns, gifts to individuals.

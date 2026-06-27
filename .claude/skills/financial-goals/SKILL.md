@@ -12,11 +12,11 @@ description: >
 Reports progress toward savings goals and the monthly contribution each requires to hit its target date. YNAB has native goals, so prefer them: read goal fields straight off your budget categories. For goals you track outside YNAB, fall back to a target plus a designated account balance.
 
 ## YNAB tools
-- `budget_summary` — primary source. `categories[]` carries native goal fields (`goal_target`, `goal_overall_funded`, `goal_overall_left`, `goal_percentage_complete`, `goal_target_month`); `accounts[]` provides balances for goals tracked outside YNAB. Every amount from `budget_summary` is in **milliunits — divide by 1000** for dollars.
+- `ynab_budget_summary` — primary source. `monthBudget.categories` carries native goal fields (`goal_target`, `goal_overall_funded`, `goal_overall_left`, `goal_percentage_complete`, `goal_target_month`); `accounts[]` provides balances for goals tracked outside YNAB. The goal fields beyond `goal_target` appear only on categories that actually have a goal set — those are your goals. Every amount from `ynab_budget_summary` is in **milliunits — divide by 1000** for dollars.
 
 ## Workflow
-1. Call `budget_summary({ month: 'current' })`.
-2. Identify native goals: every category in `categories[]` with `goal_target > 0`. This is your goal list (no need to ask the user to define them). Result: a list of goal categories.
+1. Call `ynab_budget_summary({ month: 'current' })`.
+2. Identify native goals: every category in `monthBudget.categories` with `goal_target > 0`. This is your goal list (no need to ask the user to define them). Result: a list of goal categories.
 3. For each native goal, convert milliunit fields to dollars (divide by 1000): `goal_target`, `goal_overall_funded`, `goal_overall_left`. Percent complete is `goal_percentage_complete` (already a percent). Result: per-goal target, funded, left, and percent.
 4. For each native goal, compute the required monthly contribution. Months remaining = whole months from today to `goal_target_month` (minimum 1). Required monthly = `(goal_overall_left / 1000) / months remaining`. If `goal_target_month` is null, mark required as "no date — open-ended". Result: a required-monthly figure (or "open-ended") per goal.
 5. For any goal the user tracks OUTSIDE YNAB, ask for its name, target amount, and target date, then read the balance of its designated account from `accounts[]` (divide by 1000). Compute percent and required monthly the same way as steps 3-4. Result: outside goals merged into the goal list.
