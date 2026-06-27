@@ -11,15 +11,15 @@ description: >
 Produces a categorized breakdown of spending for the current month, compares it against the prior month to surface trends, and drills into the categories where spending rose significantly.
 
 ## YNAB tools
-- `budget_summary({month})` — pull `categories[]` (name, id, activity) for a month. Call it twice: once for the current month, once for the prior month, to build the comparison. Every dollar amount it returns is in **milliunits** — divide by 1000 for dollars (e.g. `activity` of `-452310` is -$452.31 spent).
-- `transactions_by_category({categoryId})` — drill into a flagged category for transaction-level detail. Amounts here are already in dollars (do not divide). If you only have the category name, fall back to `list_transactions` and filter rows by `category_name`.
+- `ynab_budget_summary({month})` — pull `monthBudget.categories` (name, id, activity) for a month. Call it twice: once for the current month, once for the prior month, to build the comparison. Every dollar amount it returns is in **milliunits** — divide by 1000 for dollars (e.g. `activity` of `-452310` is -$452.31 spent).
+- `ynab_get_transactions({categoryId, sinceDate, limit: 100000})` — drill into a flagged category for transaction-level detail. `amount` is a **string** in dollars (e.g. `"-452.31"`) — coerce it with `Number(amount)` before any math, and do NOT divide by 1000 (it is already dollars). Always pass `limit: 100000`: the default limit is 100 and the tool returns the *oldest* rows first, so a missing limit silently drops everything newer. Pass a `sinceDate` (the first of the prior month) so the drill-in covers the months under review, not years of history. If you only have the category name, omit `categoryId` and filter the returned rows by `category_name` — note `categoryId`/`accountId`/`payeeId` are mutually exclusive, so pass only one.
 
 ## Workflow
-1. Call `budget_summary({month: "current"})`. Record each category's `id` and `activity`, converting `activity / 1000` to dollars of spend. CHECK: you have a list of `{category, id, thisMonth}` dollar amounts.
-2. Call `budget_summary` for the prior month (ISO first-of-month, e.g. `"2026-05-01"`). Convert each `activity / 1000` to dollars. CHECK: you have `lastMonth` dollars for the same categories.
+1. Call `ynab_budget_summary({month: "current"})`. Read `monthBudget.categories`, **skipping any with `hidden` or `deleted` true** (the tool returns them unfiltered, including the internal "Ready to Assign" row), and record each remaining category's `id` and `activity`, converting `activity / 1000` to dollars of spend. CHECK: you have a list of `{category, id, thisMonth}` dollar amounts.
+2. Call `ynab_budget_summary` for the prior month (ISO first-of-month, e.g. `"2026-05-01"`). Convert each `monthBudget.categories` entry's `activity / 1000` to dollars. CHECK: you have `lastMonth` dollars for the same categories.
 3. For each category compute the dollar change and percentage change between the two months. CHECK: every category row has `change ($)` and `change (%)`.
 4. Flag any category where spending increased by more than 20% **or** more than $100. CHECK: you have a (possibly empty) list of flagged categories with their `id`s.
-5. For each flagged category, call `transactions_by_category({categoryId: <that category's id>})` (or `list_transactions` filtered by `category_name`) to pull the individual transactions driving the increase. CHECK: each flagged category has its top transactions listed (amounts already in dollars).
+5. For each flagged category, call `ynab_get_transactions({categoryId: <that category's id>, sinceDate: <first of the prior month>, limit: 100000})` (or omit `categoryId` and filter the result by `category_name`) to pull the individual transactions driving the increase. `amount` is a **string** in dollars — coerce it with `Number(amount)` before summing or ranking, and do NOT divide by 1000 (it is already dollars). CHECK: each flagged category has its top transactions listed.
 6. Render the summary table:
 
 ```
@@ -59,5 +59,5 @@ TOP SPEND (this month)        BIGGEST INCREASES (%)
 
 ## Notes
 - One-time large purchases (appliances, travel, medical) can skew month-over-month comparisons. Consider whether a spike is a true trend or an outlier — the step-5 transaction drill-in usually makes this obvious.
-- For a more meaningful view, compare against a 3-month rolling average rather than just the prior month (call `budget_summary` for additional prior months and average their `activity / 1000`).
+- For a more meaningful view, compare against a 3-month rolling average rather than just the prior month (call `ynab_budget_summary` for additional prior months and average each `monthBudget.categories` entry's `activity / 1000`).
 - `activity` is negative for outflows; use its absolute value when presenting spend so the table reads in positive dollars.

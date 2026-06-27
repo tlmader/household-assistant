@@ -6,7 +6,6 @@
   "license": "MIT",
   "author": "Household Assistant <noreply@example.com>",
   "dependencies": {
-    "ynab": "^2.10.0",
-    "ynab-mcp-server": "^0.1.2"
+    "ynab-mcp-server": "github:calebl/ynab-mcp-server#36634cf98bdbea6c86dd237f1b048a51310559b4"
   }
 }

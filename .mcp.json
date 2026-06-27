@@ -4,10 +4,6 @@
       "command": "node",
       "args": ["node_modules/ynab-mcp-server/dist/index.js"]
     },
-    "ynab-transactions": {
-      "command": "node",
-      "args": ["mcp-servers/ynab-transactions/index.mjs"]
-    },
     "wave": {
       "command": "node",
       "args": ["mcp-servers/wave/index.mjs"]

@@ -10,13 +10,13 @@ description: >
 Compares spending by category across two time windows to surface gradual, often unnoticed increases — the classic "lifestyle creep" that erodes savings as income grows. Highlights which categories drifted upward, by how much, and the annual cost.
 
 ## YNAB tools
-- `budget_summary` — pull `categories[]` (with per-category `activity`) for each comparison month. All amounts are in **milliunits**; divide by 1000 for dollars. `activity` is negative for outflows, so use its absolute value as spend.
-- `list_transactions` (optional) — for a flagged category, pull recent rows (amounts already in dollars, no conversion) to see which payees drove the increase.
+- `ynab_budget_summary` — pull `monthBudget.categories` (with per-category `activity`) for each comparison month. All amounts are in **milliunits**; divide by 1000 for dollars. `activity` is negative for outflows, so use its absolute value as spend.
+- `ynab_get_transactions` (optional) — for a flagged category, pull recent rows (always pass `limit: 100000`; `amount` is a string in dollars — coerce with `Number(amount)`, no divide-by-1000) to see which payees drove the increase.
 
 ## Workflow
-1. Call `budget_summary({ month: 'current' })`. From the result, build a `{ category → spend }` map where spend = `abs(activity) / 1000`. **Checkpoint:** you have current-month spend per category in dollars.
-2. Call `budget_summary` for the month 6 months earlier (e.g. if now is `2026-06-01`, use `month: '2025-12-01'`). Build the same baseline `{ category → spend }` map. **Checkpoint:** you have baseline spend per category in dollars.
-3. (Optional smoother baseline) Average 3 months per period instead of one: call `budget_summary` for each of the 3 most recent months and the 3 months around the 6-months-ago point, then average each category's spend within each period. **Checkpoint:** each category has one current average and one baseline average.
+1. Call `ynab_budget_summary({ month: 'current' })`. From `monthBudget.categories`, **skipping any with `hidden` or `deleted` true** (the tool returns them unfiltered, including the internal "Ready to Assign" row), build a `{ category → spend }` map where spend = `abs(activity) / 1000`. **Checkpoint:** you have current-month spend per category in dollars.
+2. Call `ynab_budget_summary` for the month 6 months earlier (e.g. if now is `2026-06-01`, use `month: '2025-12-01'`). From `monthBudget.categories`, build the same baseline `{ category → spend }` map. **Checkpoint:** you have baseline spend per category in dollars.
+3. (Optional smoother baseline) Average 3 months per period instead of one: call `ynab_budget_summary` for each of the 3 most recent months and the 3 months around the 6-months-ago point, then average each category's spend (from `monthBudget.categories`) within each period. **Checkpoint:** each category has one current average and one baseline average.
 4. For each category present in both periods, compute:
    - Dollar change: `current − baseline`
    - Percentage change: `(current − baseline) / baseline * 100`
@@ -41,7 +41,7 @@ Compares spending by category across two time windows to surface gradual, often 
    **Checkpoint:** the table lists each compared category with both periods, dollar change, and % change.
 7. Sum the monthly increases across all flagged categories and multiply by 12 for the annual impact. **Checkpoint:** the table footer shows total monthly creep and annual impact.
 8. Suggest a concrete target, e.g. "If you returned Dining Out and Shopping to 6-month-ago levels, you would save $3,240/year." **Checkpoint:** at least one named savings target with a dollar figure.
-9. (Optional) For the top flagged category, call `list_transactions` (or `transactions_by_category` with that category's `id`) and group rows by payee to show what drove the increase. **Checkpoint:** the largest contributors to the increase are named.
+9. (Optional) For the top flagged category, call `ynab_get_transactions` (pass `limit: 100000`, plus `categoryId` set to that category's `id` to scope to it) and group rows by payee to show what drove the increase — `amount` is a string in dollars, so coerce with `Number(amount)` before summing. **Checkpoint:** the largest contributors to the increase are named.
 
 ## Manual fallback (no YNAB)
 1. Export 12 months of transactions from your bank as CSV.

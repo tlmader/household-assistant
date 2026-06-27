@@ -14,15 +14,15 @@ Estimates the IRS underpayment penalty (Form 2210) for taxpayers who did not pay
 
 ## YNAB tools
 
-- `list_transactions({sinceDate})` — pull posted transactions, then filter the rows yourself to IRS / EFTPS / state tax authority payees to find each estimated payment's date and amount. Amounts are already in dollars.
-- `budget_summary({month})` — only if you need an income figure for the required-annual-payment math; read `monthBudget.income` and divide by 1000 (milliunits). Transaction amounts are dollars and are never divided.
+- `ynab_get_transactions({sinceDate, limit: 100000})` — pull posted transactions, then filter the rows yourself to IRS / EFTPS / state tax authority payees to find each estimated payment's date and amount. Always pass `limit: 100000` — the default limit is 100, so without it you silently get only the oldest 100 rows and drop everything newer. Each `amount` is a **string** in dollars (e.g. `"-3760.14"`) — coerce it with `Number(amount)` before any sum or comparison, and do not divide by 1000 (it is already dollars).
+- `ynab_budget_summary({month})` — only if you need an income figure for the required-annual-payment math; read `monthBudget.income` and divide by 1000 (milliunits). Transaction amounts are strings in dollars and are never divided — coerce each with `Number(amount)`.
 
 ## Workflow
 
 1. Determine the total tax liability for the year (from your completed return or estimate). Checkable result: a single dollar figure for total tax.
 2. Calculate the required annual payment (lesser of 90% of current year tax or 100%/110% of prior year tax). Checkable result: a required-annual-payment dollar figure.
 3. Divide the required annual payment by 4 to get the per-quarter minimum. Checkable result: one per-quarter dollar amount.
-4. Call `list_transactions({sinceDate})` for the tax year, then filter to IRS / EFTPS / state tax payees. Checkable result: a list of estimated payments, each with date and amount (dollars).
+4. Call `ynab_get_transactions({sinceDate, limit: 100000})` for the tax year — the large `limit` is required, because the default of 100 returns only the oldest rows and silently drops everything newer — then filter to IRS / EFTPS / state tax payees. The tool also returns unapproved and uncleared rows, so count a payment only once it shows `cleared`. Coerce each `amount` with `Number(amount)` before comparing. Checkable result: a list of estimated payments, each with date and amount (dollars).
 5. For each quarter, compare what was paid by the due date against the per-quarter minimum. Checkable result: a paid-vs-required line and shortfall for each of the four quarters.
 6. For any quarter with a shortfall, calculate the penalty using the formula below. Checkable result: a penalty dollar amount per shortfall quarter, summed to a total.
 

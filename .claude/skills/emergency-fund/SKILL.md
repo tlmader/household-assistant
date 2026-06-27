@@ -13,11 +13,11 @@ description: >
 Sizes an emergency fund target from monthly essential expenses, reads the current emergency-fund savings balance, and estimates how long it takes to reach 3-, 4-, and 6-month coverage at the user's savings rate.
 
 ## YNAB tools
-- `budget_summary({month:'current'})` — source for essential-category spend (`categories[].activity`) and the savings-account balance (`accounts[]`). To smooth a noisy month, call it again per recent month (ISO like `2026-05-01`) and average. All `budget_summary` amounts are in **milliunits — divide by 1000 for dollars**.
+- `ynab_budget_summary({month:'current'})` — source for essential-category spend (`monthBudget.categories[].activity`) and the savings-account balance (`accounts[]`). To smooth a noisy month, call it again per recent month (ISO like `2026-05-01`) and average. All `ynab_budget_summary` amounts are in **milliunits — divide by 1000 for dollars**.
 
 ## Workflow
-1. Call `budget_summary({month:'current'})`. Optionally call it for the prior 1-2 months and average the essential totals.
-2. From `categories[]`, sum `abs(activity)/1000` across essential category groups only: Housing/Rent, Utilities, Groceries, Transportation, Insurance, Healthcare, and minimum debt payments. This is **monthly essential expenses**. Result: one dollar figure.
+1. Call `ynab_budget_summary({month:'current'})`. Optionally call it for the prior 1-2 months and average the essential totals.
+2. From `monthBudget.categories`, sum `abs(activity)/1000` across essential category groups only: Housing/Rent, Utilities, Groceries, Transportation, Insurance, Healthcare, and minimum debt payments. This is **monthly essential expenses**. Result: one dollar figure.
 3. Compute targets from monthly essentials:
    - **Minimum (3 months):** essentials x 3
    - **Standard (4 months):** essentials x 4
@@ -42,7 +42,7 @@ Sizes an emergency fund target from monthly essential expenses, reads the curren
    ```
 
    Progress bar = current balance ÷ 6-month target.
-8. If the savings rate makes the timeline long, point to specific non-essential category groups from `categories[]` where cuts could be redirected to savings.
+8. If the savings rate makes the timeline long, point to specific non-essential category groups from `monthBudget.categories` where cuts could be redirected to savings.
 
 ## Manual fallback (no YNAB)
 1. Export 3 months of bank transactions as CSV.

@@ -1,0 +1,8 @@
+# ynab-mcp-server is pinned to a git commit (no npm release has the transaction
+# read tools yet — see https://github.com/calebl/ynab-mcp-server/issues/29).
+# A git-hosted dep ships TypeScript source, so pnpm must run its `prepare`
+# build (tsc) to produce dist/. pnpm v10 blocks dependency build scripts by
+# default, so the package is allowlisted here. Drop this once a published npm
+# release ships prebuilt dist/.
+onlyBuiltDependencies:
+  - ynab-mcp-server

@@ -14,16 +14,16 @@ Estimates state income tax from total income and state of residence, then nets o
 
 ## YNAB tools
 
-- `budget_summary` — pull `monthBudget.income` for each month of the tax year to total gross income. All amounts are in **milliunits**; divide by 1000 for dollars.
-- `list_transactions` — find state tax payments already made (withholding or estimated payments). Filter rows yourself by payee for the state tax authority. These amounts are already in dollars; do not divide.
+- `ynab_budget_summary` — pull `monthBudget.income` for each month of the tax year to total gross income. All amounts are in **milliunits**; divide by 1000 for dollars.
+- `ynab_get_transactions` — find state tax payments already made (withholding or estimated payments). Pass `limit: 100000` so the full window comes back — the default limit of 100 returns only the oldest 100 rows and silently drops everything newer. Filter rows yourself by payee for the state tax authority. Each `amount` is a **string** in dollars — coerce it with `Number(amount)` before any sum or comparison; do not divide by 1000.
 
 ## Workflow
 
 1. Ask the user for their state of residence (and work state, if different). Result: residence state is known; check the no-income-tax list below — if it's there, report $0 and stop.
-2. Total gross income for the tax year: call `budget_summary({month})` once per month of the year and sum `monthBudget.income / 1000`. If income isn't captured in YNAB, ask the user for the figure. Result: a single gross income dollar amount.
+2. Total gross income for the tax year: call `ynab_budget_summary({month})` once per month of the year and sum `monthBudget.income / 1000`. If income isn't captured in YNAB, ask the user for the figure. Result: a single gross income dollar amount.
 3. Subtract the state standard deduction (or known adjustments) from gross income. Result: estimated taxable income.
 4. Apply the state's brackets to taxable income (use the rate table below or look up current brackets). Result: estimated tax before payments.
-5. Find payments already made: `list_transactions({sinceDate})` for the start of the tax year, filter to the state tax-authority payee (withholding, estimated payments). Sum the dollar amounts. Result: total state tax paid so far.
+5. Find payments already made: `ynab_get_transactions({sinceDate, limit: 100000})` for the start of the tax year, filter to the state tax-authority payee (withholding, estimated payments). Coerce each `amount` with `Number(amount)` and sum the dollar amounts — the strings are already dollars, so do not divide by 1000. Result: total state tax paid so far.
 6. Subtract step 5 from step 4. Result: estimated balance due or refund.
 
 ```

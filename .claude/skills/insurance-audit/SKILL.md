@@ -11,11 +11,11 @@ description: >
 Identifies all insurance-related transactions in your history, calculates your total annual insurance spend, breaks it down by type (auto, home/renters, life, etc.), and compares your costs to typical ranges so you can spot overpaying.
 
 ## YNAB tools
-- `list_transactions` — pulls posted transactions (amounts already in dollars) so you can find every insurance premium payment across accounts and infer payment cadence from the dates.
-- `budget_summary({month: 'current'})` (optional) — only for the *% of Annual Income* line: read `monthBudget.income` (milliunits ÷ 1000) and annualize (× 12).
+- `ynab_get_transactions` — pulls posted transactions so you can find every insurance premium payment across accounts and infer payment cadence from the dates. Always pass `limit: 100000` (the default limit of 100 returns only the oldest 100 rows and silently drops everything newer). Each `amount` is a string in dollars — coerce with `Number(amount)` before any math, and do not divide by 1000. Rows come back oldest-first.
+- `ynab_budget_summary({month: 'current'})` (optional) — only for the *% of Annual Income* line: read `monthBudget.income` (milliunits ÷ 1000) and annualize (× 12).
 
 ## Workflow
-1. Call `list_transactions({ sinceDate: <one year ago> })` to pull the last 12 months of posted transactions. Result: a list of rows with `date`, `amount`, `payee_name`, `category_name`, and `account_name`.
+1. Call `ynab_get_transactions({ sinceDate: <one year ago>, limit: 100000 })` to pull the last 12 months of posted transactions — the large `limit` is required, since the default of 100 returns only the oldest 100 rows and drops everything newer. Result: a list of rows (oldest-first) with `date`, `amount` (a string in dollars), `payee_name`, `category_name`, and `account_name`.
 2. Filter rows to insurance payments by matching `payee_name` against insurer keywords (Geico, State Farm, Allstate, Progressive, USAA, Liberty Mutual, Nationwide, MetLife, Aetna, UnitedHealth, Cigna, Blue Cross, Kaiser, "insurance", "premium"), or by an Insurance `category_name`. Result: a filtered set of insurance rows.
 3. Group the filtered rows by `payee_name` and classify each group into an insurance type:
    - Auto insurance
@@ -26,7 +26,7 @@ Identifies all insurance-related transactions in your history, calculates your t
    - Umbrella / Liability insurance
    - Pet insurance
    - Other
-4. For each group, infer payment frequency from the spacing of the dates (monthly, quarterly, semi-annual, annual), then annualize the per-payment amount (amounts are already dollars — no conversion). Result: frequency and annual cost per type.
+4. For each group, infer payment frequency from the spacing of the dates (monthly, quarterly, semi-annual, annual), then annualize the per-payment amount (coerce each `amount` with `Number(amount)` first — it is a string already in dollars, so no division by 1000). Result: frequency and annual cost per type.
 5. Present the insurance summary:
 
    ```
@@ -43,7 +43,7 @@ Identifies all insurance-related transactions in your history, calculates your t
    % of Annual Income:                       X.X%
    ```
 
-   The *% of Annual Income* line needs annual income — get it from `budget_summary` (`monthBudget.income / 1000 × 12`) or ask the user; omit the line if neither is available.
+   The *% of Annual Income* line needs annual income — get it from `ynab_budget_summary` (`monthBudget.income / 1000 × 12`) or ask the user; omit the line if neither is available.
 
 6. Compare each line to typical cost ranges:
    - Auto: $1,400-$2,400/year (national average ~$1,900) depending on coverage, age, and location
