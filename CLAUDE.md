@@ -8,6 +8,8 @@ If you keep a curated, local source of truth for personal-finance and records qu
 
 When a vault is configured, read it first for any question about accounts, net worth, insurance, investments, loans, taxes, subscriptions, travel, or medical history. The vault is the digested answer; YNAB and other portals are the underlying sources you refresh it from. Give each note an `as_of_date` and re-pull from the named source when it's stale.
 
+When a note's facts come from a Google Drive document, always include a clickable Drive link: carry a `source_doc_ref` link in the frontmatter and make every Drive reference in the body clickable too, never a bare id. Use the plain link form with no tracking parameters (write `https://drive.google.com/file/d/FILE_ID/view`, not `...?usp=sharing`). Verify the id resolves before linking and never invent one; when the source is a live portal with no Drive document, label that source instead of fabricating a link.
+
 ## Budgets
 
 Configure your own YNAB budgets. The `YNAB_BUDGET_ID` env var (set in `~/.claude.json`, never committed) selects the default budget used when none is specified; pass `budgetId` to target another. Run `ynab_list_budgets` to see the budgets on your account.
