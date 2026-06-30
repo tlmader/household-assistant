@@ -62,6 +62,7 @@ Some skills can pull supporting documents from Google Workspace (Drive, Gmail, C
 
 - **Sentence case** for all filenames and headings — capitalize only the first word and proper nouns. Applies to Markdown headings and any doc this repo produces. Proper nouns (people, brands, institutions — "Fidelity", "State Farm", "YNAB") keep their casing.
 - **Always use the `writing-clearly-and-concisely` skill when writing prose** — note bodies, summaries, reports, docs, commit messages, and any human-readable text. Apply it before finalizing the writing, not as an afterthought.
+- **Never use em dashes (`—`).** This applies to every output this project produces: note bodies, outreach messages, summaries, reports, docs, commit messages, and chat replies. Use a comma, colon, parentheses, or a separate sentence instead; for numeric ranges use "to" or a hyphen.
 
 ## Conventions
 
