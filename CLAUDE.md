@@ -60,6 +60,10 @@ Some skills can pull supporting documents from Google Workspace (Drive, Gmail, C
 - **Show the arithmetic and recompute.** Print the steps rather than asserting a total, and label a genuine computation vs. an assumption-driven default vs. a needs-user-input gap.
 - **For high-stakes plans (a tax strategy, a large allocation), run an adversarial review** — fan out per-dimension reviewers, each loading the relevant skill, then verify each material finding before trusting it.
 
+## Browser and app inspection
+
+Read the page, don't photograph it. Image screenshots cost far more tokens than text, so inspect a browser or app through its text or accessibility layer first: Chrome via `get_page_text` or `read_page`, Preview via `preview_snapshot`, Maestro via `inspect_screen`. Take a screenshot only when a visual is the only way to answer, for example when the rendered layout or an image itself is the question and no text extraction can supply it.
+
 ## Writing conventions
 
 - **Sentence case** for all filenames and headings — capitalize only the first word and proper nouns. Applies to Markdown headings and any doc this repo produces. Proper nouns (people, brands, institutions — "Fidelity", "State Farm", "YNAB") keep their casing.
