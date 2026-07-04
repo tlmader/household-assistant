@@ -50,6 +50,13 @@ What the tools actually return — the single source of truth the finance skills
 
 Some skills can pull supporting documents from Google Workspace (Drive, Gmail, Calendar). If you use them, prefer a CLI authenticated as the account that owns your data over the generic MCP connectors — the connectors often authenticate as a different account and silently return the wrong files. The `gws-*` skills wrap a `gws` CLI for this purpose; configure the account and any folder IDs locally (in `~/.claude.json` or env vars), never in this repo.
 
+## Skills layout
+
+Skills live in two places by design. **`.agents/skills/<name>/` is canonical**: the real `SKILL.md` and any bundled files live there. **`.claude/skills/<name>` is a symlink** into `.agents/skills/` and is where Claude Code discovers skills. Every entry under `.claude/skills/` is a symlink; there are no real directories there, so keep it that way.
+
+- **Add a skill:** create it under `.agents/skills/<name>/`, then symlink it in with `ln -s ../../.agents/skills/<name> .claude/skills/<name>` and `git add` the symlink. Never create a real directory under `.claude/skills/`; use `git mv` to relocate one that slipped in, then symlink it back.
+- **Edit a skill:** the canonical file is under `.agents/skills/<name>/`. The `.claude/skills/<name>/...` path resolves to the same file through the symlink, so either path edits the same content, but treat `.agents/skills/` as the home. References elsewhere (docs, a scheduled routine's prompt) may point at the `.claude/skills/...` path; that still resolves through the symlink, so no need to rewrite them.
+
 ## Skills and calculations — don't compute from memory
 
 - **For any tax, accounting, or financial calculation, load the authoritative skill first — never compute rates, brackets, thresholds, or penalties from memory.** A "conservative shortcut" presented as a number is an error, not an estimate. (Capital gains, for example, run a bracket stack with a 0% band — a flat 15% assumption overstates the tax.)
