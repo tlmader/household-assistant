@@ -55,7 +55,7 @@ One server covers the whole YNAB surface the skills depend on. `ynab_budget_summ
 
 ## Skills
 
-Claude invokes most skills on its own when your request matches. They fall into three groups.
+Claude invokes most skills on its own when your request matches. They fall into four groups.
 
 **Finance (12)** — adapted from [`openaccountant/skills`](https://github.com/openaccountant/skills) (`personal/`) and rewired to run on YNAB. Each falls back to a manual procedure when YNAB can't supply the data.
 
@@ -78,6 +78,8 @@ Claude invokes most skills on its own when your request matches. They fall into 
 
 **Productivity (5)** — from [`mattpocock/skills`](https://github.com/mattpocock/skills): `grill-me` and `grilling` stress-test a plan before you build it, `handoff` writes a session handoff, `teach` runs a teaching loop, and `writing-great-skills` is a reference for authoring skills. Invoke these by name; Claude won't trigger them on its own.
 
+**Email (2)**: from [`alirezarezvani/claude-skills`](https://github.com/alirezarezvani/claude-skills) (MIT), adapted to read one Gmail mailbox through the `gws` CLI instead of an email MCP connector. `inbox-setup` interviews you once to build a knowledge base of your categories, reply voice, blocklist, and trackers; `inbox-triage` then classifies new mail, drafts replies (never sends), reports, and updates the knowledge base. See [Set up inbox triage](#set-up-inbox-triage).
+
 The finance skills give estimates, not tax or financial advice. Check anything that matters with a professional.
 
 ## Conventions
@@ -94,6 +96,25 @@ The vault is just a folder, so you can host it either way:
 - **Google Drive (shared across people).** Keep the notes in a Google Drive folder synced to disk with Drive for Desktop, and point `PERSONAL_VAULT_PATH` at the local sync path. This lets more than one person share the same knowledge base: each clones the repo, runs their own Claude Code, and reads and writes the same notes. Co-locate each note beside the source documents it digests, and add a `conventions.md` (schema and rules) and an `index.md` (every note by path) at the folder root so any session can orient without crawling folders of PDFs.
 
 Either way, the note format is the same: YAML frontmatter for structured fields, a body for history and source links.
+
+## Set up inbox triage
+
+Inbox triage reads and drafts in one Gmail mailbox and keeps a small knowledge base of your preferences outside the repo. It builds on the `gws-*` Google Workspace skills, so set those up first.
+
+1. **Install and authenticate the `gws` CLI** as the mailbox owner, per the [googleworkspace/cli](https://github.com/googleworkspace/cli) install instructions (`gws auth login`). The skills use `gws`, not the Gmail MCP connector, which in this project authenticates as a different account and returns the wrong mailbox.
+
+2. **(Optional) Choose where the knowledge base lives.** It holds personal preferences (categories, voice, blocklist, trackers) and must stay out of git. Set `INBOX_TRIAGE_WORKSPACE` in `.claude/settings.local.json` or your shell; it defaults to `~/.household-assistant/inbox-triage`.
+
+   ```jsonc
+   // .claude/settings.local.json
+   { "env": { "INBOX_TRIAGE_WORKSPACE": "…" } }
+   ```
+
+3. **Run `inbox-setup` once.** Ask Claude "set up inbox triage". It walks an interview (one question at a time) about your categories, reply voice, blocklist, and open threads, and writes a 7-file knowledge base to `$INBOX_TRIAGE_WORKSPACE/Email/`. It reads your real inbox and sent mail to ground the taxonomy and calibrate your voice; it does not touch the mailbox otherwise.
+
+4. **Run `inbox-triage`.** Ask "triage my inbox" (or schedule it). It classifies recent mail against your taxonomy, drafts replies for anything that needs one, delivers your report in the format you chose, and updates the knowledge base. Re-run `inbox-setup` anytime your priorities change.
+
+The skill **never sends email and never deletes**: its only writes are creating Gmail drafts for you to review and updating the local knowledge base. First runs need oversight while the voice and taxonomy settle.
 
 ## Layout
 
@@ -112,4 +133,4 @@ Never commit tokens. Secrets belong in your shell environment or `.claude/settin
 
 ## License
 
-Released under the [MIT License](LICENSE). The bundled skills are vendored from [`openaccountant/skills`](https://github.com/openaccountant/skills) (MIT), [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT), and [`googleworkspace/cli`](https://github.com/googleworkspace/cli) (Apache-2.0); their license and attribution notices are reproduced in [NOTICE](NOTICE).
+Released under the [MIT License](LICENSE). The bundled skills are vendored from [`openaccountant/skills`](https://github.com/openaccountant/skills) (MIT), [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT), [`alirezarezvani/claude-skills`](https://github.com/alirezarezvani/claude-skills) (MIT), and [`googleworkspace/cli`](https://github.com/googleworkspace/cli) (Apache-2.0); their license and attribution notices are reproduced in [NOTICE](NOTICE).
