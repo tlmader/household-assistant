@@ -86,7 +86,14 @@ Claude reads, summarizes, categorizes, and creates *unapproved* transactions. It
 
 ## Personal data vault (optional)
 
-Point Claude at a local source of truth — for example an Obsidian vault with one structured note per account, policy, or asset — by setting `PERSONAL_VAULT_PATH`. When set, Claude reads the vault first for finance and records questions and refreshes it from the underlying sources (YNAB, portals) when a note goes stale. See [CLAUDE.md](CLAUDE.md) for the full data surface the skills build on.
+Point Claude at a curated source of truth by setting `PERSONAL_VAULT_PATH`. A vault is a folder of markdown notes, one structured note per entity (account, policy, asset, loan, trip, tax return). When set, Claude reads the vault first for finance and records questions, and refreshes it from the underlying sources (YNAB, portals) when a note goes stale. See [CLAUDE.md](CLAUDE.md) for the full data surface the skills build on.
+
+The vault is just a folder, so you can host it either way:
+
+- **Obsidian (single machine).** Keep the notes in a local Obsidian vault and point `PERSONAL_VAULT_PATH` at it. Simplest option for one operator.
+- **Google Drive (shared across people).** Keep the notes in a Google Drive folder synced to disk with Drive for Desktop, and point `PERSONAL_VAULT_PATH` at the local sync path. This lets more than one person share the same knowledge base: each clones the repo, runs their own Claude Code, and reads and writes the same notes. Co-locate each note beside the source documents it digests, and add a `conventions.md` (schema and rules) and an `index.md` (every note by path) at the folder root so any session can orient without crawling folders of PDFs.
+
+Either way, the note format is the same: YAML frontmatter for structured fields, a body for history and source links.
 
 ## Layout
 
