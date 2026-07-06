@@ -75,6 +75,15 @@ Skills live in two places by design. **`.agents/skills/<name>/` is canonical**: 
 
 Read the page, don't photograph it. Image screenshots cost far more tokens than text, so inspect a browser or app through its text or accessibility layer first: Chrome via `get_page_text` or `read_page`, Preview via `preview_snapshot`, Maestro via `inspect_screen`. Take a screenshot only when a visual is the only way to answer, for example when the rendered layout or an image itself is the question and no text extraction can supply it.
 
+## Repository hygiene: never commit personal data
+
+**This repository is public. Committing personal or household data is a hard error, not a style issue.** The offending data must never enter a commit in the first place, because a later "delete" commit does not remove it: git history and the remote keep it forever, and scrubbing then costs a full history rewrite and force-push.
+
+- **Never put real personal or household values in any committed file** (source, docs, `README`, `CLAUDE.md`, examples, and especially skill `SKILL.md` files and their `description` frontmatter, which is where a personal email once leaked). Banned values include: real personal names, personal email addresses, phone numbers, street or mailing addresses, account numbers or last-4, SSNs and tax IDs, YNAB budget ids and API tokens, Drive file or folder ids, personal filesystem or vault paths, and any household-specific fact.
+- **Use placeholders instead**: `you@example.com`, `<your account>`, `FOLDER_ID`, `YOUR_BUDGET_ID`, `/path/to/vault`. Real values live only where git never sees them: the gitignored `.claude/settings.local.json`, `~/.claude.json`, the Google Drive vault and its `conventions.md`, and auto-memory.
+- **Scan the staged diff before every commit.** Run `git diff --cached` and check for an email address (`grep -nE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'`), for Drive-id-shaped strings, and for known household names or paths. If anything matches, stop and replace it with a placeholder before committing.
+- **If personal data has already been committed**, do not just delete it in a new commit. Scrub it from history (`git filter-repo` or `filter-branch`), then force-push, and rebase or retire any local branches that still carry it in their ancestry.
+
 ## Writing conventions
 
 - **Sentence case** for all filenames and headings — capitalize only the first word and proper nouns. Applies to Markdown headings and any doc this repo produces. Proper nouns (people, brands, institutions — "Fidelity", "State Farm", "YNAB") keep their casing.
