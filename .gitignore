@@ -9,3 +9,10 @@ logs/
 # Local scratch and personal data — never commit
 .tmp-va/
 *va-blue-button*
+
+# Local agent worktrees created by the harness under .claude/.
+.claude/worktrees/
+
+# Transient skills install lock/staging files.
+.skills-install.lock
+.skills-install.lock.*.tmp
