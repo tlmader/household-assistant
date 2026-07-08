@@ -1,6 +1,8 @@
+@AGENTS.md
+
 # Household assistant
 
-This project integrates the [YNAB MCP server](https://github.com/calebl/ynab-mcp-server) so Claude can read and manage YNAB budgets.
+This project integrates the [YNAB MCP server](https://github.com/calebl/ynab-mcp-server) so Claude can read and manage YNAB budgets. `AGENTS.md` (imported above) carries the shared workflow contract: structure, commands, commit and PR conventions. Everything below is Claude-specific operating guidance.
 
 ## Personal data vault (optional)
 
