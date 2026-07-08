@@ -35,4 +35,4 @@ The `commit-msg` hook enforces this. PR titles use the same format so the squash
 
 - `pnpm install` succeeds and the MCP servers start.
 - `git status` shows nothing personal staged.
-- Docs match the change — update `README.md` and `CLAUDE.md` if you alter servers, skills, or setup.
+- Docs match the change: update `README.md` and `CLAUDE.md` if you alter servers, skills, or setup.
