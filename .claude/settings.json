@@ -9,5 +9,18 @@
   },
   "enabledPlugins": {
     "openaccountants@openaccountants": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/worktree-setup.sh"
+          }
+        ]
+      }
+    ]
   }
 }
