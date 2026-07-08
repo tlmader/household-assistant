@@ -1,0 +1,39 @@
+# Template for the household denylist. Copy to .gitleaks.local.toml at the
+# repository root (it is gitignored; NEVER commit the real file) and replace
+# the placeholder patterns with your household's literal values. Keep the same
+# content in the PII_DENYLIST_TOML repository secret so CI scans with it:
+#
+#   gh secret set PII_DENYLIST_TOML < .gitleaks.local.toml
+#
+# The pre-commit hook picks this file up automatically when it exists. All
+# scans run with --redact, so a match reports the rule id, file, and line but
+# never prints the matched value.
+
+[extend]
+path = ".gitleaks.toml"
+
+# Household names: family surnames, first names, distinctive nicknames,
+# budget names, property or building names.
+[[rules]]
+id = "household-name"
+description = "Household name or distinctive household word"
+regex = '''(?i)\b(SURNAME|SPOUSE_FIRST_NAME|DISTINCTIVE_BUDGET_NAME|BUILDING_NAME)\b'''
+
+# Household email addresses (also caught by the generic email rule; listed
+# literally so commit-message and PR-body scans flag them by name).
+[[rules]]
+id = "household-email"
+description = "Household email address"
+regex = '''(?i)(your\.address@gmail\.com|other\.address@example\.org)'''
+
+# Street addresses: number + street fragments distinctive to the household.
+[[rules]]
+id = "household-address"
+description = "Household street address fragment"
+regex = '''(?i)(1234 (Example|Sample) (St|Ave)|NEIGHBORHOOD_NAME)'''
+
+# Literal ids: YNAB budget UUIDs, Google Drive file/folder ids, account ids.
+[[rules]]
+id = "household-id"
+description = "Household YNAB budget id or Drive id"
+regex = '''(00000000-0000-0000-0000-000000000000|DriveFolderIdGoesHere123456)'''
