@@ -1,0 +1,75 @@
+name: PII
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Scan
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+    steps:
+      - name: Check out repository
+        # actions/checkout@v4.3.1
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+          sudo install /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Select scan config
+        env:
+          DENYLIST_TOML: ${{ secrets.PII_DENYLIST_TOML }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+        run: |
+          # Same-repo PRs must scan with the household denylist; a missing
+          # secret would silently weaken the check, so fail loudly instead.
+          # Fork PRs never receive secrets, so they degrade to generic rules.
+          if [ -n "$DENYLIST_TOML" ]; then
+            printf '%s' "$DENYLIST_TOML" > "$RUNNER_TEMP/denylist.toml"
+            echo "GITLEAKS_CONFIG=$RUNNER_TEMP/denylist.toml" >> "$GITHUB_ENV"
+            echo "Using household denylist + committed rules."
+          elif [ "$IS_FORK" = "true" ]; then
+            echo "GITLEAKS_CONFIG=.gitleaks.toml" >> "$GITHUB_ENV"
+            echo "::warning::Fork PR: scanning with generic committed rules only (no denylist secret)."
+          else
+            echo "::error::PII_DENYLIST_TOML secret is empty or missing. Create it with: gh secret set PII_DENYLIST_TOML < .gitleaks.local.toml"
+            exit 1
+          fi
+
+      - name: Scan PR commits (diff contents)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gitleaks git . --redact --no-banner \
+            --log-opts="${BASE_SHA}..${HEAD_SHA} --no-merges"
+
+      - name: Scan full working tree
+        run: gitleaks dir . --redact --no-banner
+
+      - name: Scan commit messages
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git log --format='%H%n%B' "${BASE_SHA}..${HEAD_SHA}" \
+            | gitleaks stdin --redact --no-banner
+
+      - name: Scan PR title and body
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" \
+            | gitleaks stdin --redact --no-banner

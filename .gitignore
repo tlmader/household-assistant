@@ -16,3 +16,6 @@ logs/
 # Transient skills install lock/staging files.
 .skills-install.lock
 .skills-install.lock.*.tmp
+
+# Household PII denylist for gitleaks — real values, never commit
+.gitleaks.local.toml

@@ -1,0 +1,86 @@
+# PII and secret scanning config (committed layer).
+#
+# Two-layer design: this file carries generic shape rules and inherits the
+# stock gitleaks secret rules. The household-specific denylist (real names,
+# emails, ids) is NEVER committed: it lives in .gitleaks.local.toml
+# (gitignored, see .gitleaks.local.example.toml) for the pre-commit hook, and
+# in the PII_DENYLIST_TOML repository secret for CI. Both extend this file.
+#
+# Scanners must run with --redact so a match never prints the matched text:
+# CI logs on a public repo are world-readable.
+
+title = "household-assistant PII rules"
+
+[extend]
+useDefault = true
+
+# Any real email address. Placeholders and infrastructure addresses are
+# allowlisted; real mailboxes have no business in this repo.
+[[rules]]
+id = "pii-email-address"
+description = "Email address (use placeholders like you@example.com)"
+regex = '''[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'''
+
+[[rules.allowlists]]
+regexTarget = "match"
+regexes = [
+  '''@example\.(com|org|net)$''',
+  '''^noreply@''',
+  '''@users\.noreply\.github\.com$''',
+  '''^git@github\.com$''',
+  '''@mail\.gmail\.com$''',   # Gmail Message-ID examples in gws skill docs
+  '''^i@izs\.me$''',          # upstream fixture in a vendored skill
+  '''@digest\.com$''',        # upstream fixture in the inbox-triage skill
+]
+
+# UUIDs: YNAB budget and account ids are UUIDs and must never be committed.
+# No legitimate committed file in this repo contains a UUID.
+[[rules]]
+id = "pii-uuid"
+description = "UUID (YNAB budget/account ids are UUIDs; use YOUR_BUDGET_ID)"
+regex = '''\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b'''
+
+[[rules.allowlists]]
+regexTarget = "match"
+regexes = ['''^00000000-0000-0000-0000-000000000000$''']  # documentation placeholder
+
+# Google Drive / Docs ids inside URLs. Docs must use FILE_ID / FOLDER_ID
+# placeholders, which are too short to match.
+[[rules]]
+id = "pii-google-drive-id"
+description = "Google Drive file/folder id in a URL (use FILE_ID placeholder)"
+regex = '''(?:drive|docs)\.google\.com/(?:file/d/|drive/folders/|open\?id=|\w+/d/)[-\w]{20,}'''
+
+# Personal filesystem paths reveal usernames and machine layout.
+[[rules]]
+id = "pii-personal-path"
+description = "Personal /Users path (use /path/to/... placeholders)"
+regex = '''/Users/[A-Za-z0-9._-]+'''
+
+[[rules.allowlists]]
+regexTarget = "match"
+regexes = [
+  '''^/Users/(you|username|<[^/]*>|\$\{?[A-Za-z_]+\}?)$''',
+]
+
+# US Social Security number shape.
+[[rules]]
+id = "pii-ssn"
+description = "SSN-shaped number"
+regex = '''\b\d{3}-\d{2}-\d{4}\b'''
+
+# US phone number shapes with separators.
+[[rules]]
+id = "pii-phone"
+description = "Phone-number-shaped string"
+regex = '''(?:\+1[ .-])?\(?\d{3}\)?[ .-]\d{3}[ .-]\d{4}\b'''
+
+[[rules.allowlists]]
+regexTarget = "match"
+regexes = ['''555[ .-]?\d{4}$''']  # 555 exchange = fiction/placeholder
+
+# US street address shape.
+[[rules]]
+id = "pii-street-address"
+description = "Street-address-shaped string"
+regex = '''(?i)\b\d{1,5} [A-Za-z0-9]+(?: [A-Za-z0-9]+)? (st|street|ave|avenue|road|rd|blvd|boulevard|drive|dr|lane|ln|court|ct|place|pl)\.?\b'''
