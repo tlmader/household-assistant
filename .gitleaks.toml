@@ -49,7 +49,7 @@ regexes = ['''^00000000-0000-0000-0000-000000000000$''']  # documentation placeh
 [[rules]]
 id = "pii-google-drive-id"
 description = "Google Drive file/folder id in a URL (use FILE_ID placeholder)"
-regex = '''(?:drive|docs)\.google\.com/(?:file/d/|drive/folders/|open\?id=|\w+/d/)[-\w]{20,}'''
+regex = '''(?:drive|docs)\.google\.com/(?:file/d/|drive/folders/|open\?id=|uc\?(?:export=\w+&)?id=|\w+/d/)[-\w]{20,}'''
 
 # Personal filesystem paths reveal usernames and machine layout.
 [[rules]]
