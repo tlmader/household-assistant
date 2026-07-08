@@ -92,4 +92,4 @@ Pin every action reference to a full 40-character commit SHA, not a tag. Above e
 
 ## Repository hygiene
 
-This repo is public and its history is anonymized. Never commit real personal or household values, and never commit as a personal identity; the repo git config sets the committer. See `CLAUDE.md` for the full banned-values list and the staged-diff scan required before every commit.
+This repo is public. Never commit real personal or household values in file content; see `CLAUDE.md` for the full banned-values list and the gitleaks scan (pre-commit hook and CI) that enforces it. Commits are authored under the maintainer's identity and SSH-signed, so the author name in `LICENSE` and `package.json` is intentional and allowlisted; that is content, not a reason to relax the household denylist elsewhere.
