@@ -34,6 +34,8 @@ Examples:
 - `feat: #12 add subscription audit skill`
 - `docs: #17 clarify SnapTrade setup`
 
+Start the description with a lowercase word; keep proper nouns capitalized (`YNAB`, `SnapTrade`, `Patina`, `AGENTS.md`). commitlint leaves subject case unenforced precisely so proper nouns are allowed, so this is a convention the hook does not check.
+
 PR titles use the same format so squash commits reuse them verbatim. Fill in `.github/pull_request_template.md` as written: a closing keyword (`Closes #<issue>`) is required, `What changed` states each change and why, and `Testing steps` appears only for human-owned behavior or artifact checks. GitHub Checks are the source of truth for routine automated verification; do not paste passing command output into PR bodies.
 
 Issue titles stay plain-language, with no commit-style prefix.
