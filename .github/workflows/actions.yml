@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint workflows
     runs-on: ubuntu-latest
     steps:
       # actions/checkout@v4.3.1
