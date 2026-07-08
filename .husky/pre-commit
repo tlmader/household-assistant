@@ -1,0 +1,18 @@
+set -e
+
+pnpm exec lint-staged
+
+# PII scan of the staged diff: committed shape rules plus the household
+# denylist when present (.gitleaks.local.toml at the primary checkout root,
+# shared by all worktrees; see .gitleaks.local.example.toml).
+if command -v gitleaks >/dev/null 2>&1; then
+  denylist="$(git rev-parse --path-format=absolute --git-common-dir)/../.gitleaks.local.toml"
+  if [ -f "$denylist" ]; then
+    gitleaks git --pre-commit --staged --redact --no-banner --config "$denylist"
+  else
+    echo "pre-commit: warning: no .gitleaks.local.toml denylist; scanning generic shapes only" >&2
+    gitleaks git --pre-commit --staged --redact --no-banner --config .gitleaks.toml
+  fi
+else
+  echo "pre-commit: warning: gitleaks not installed (brew install gitleaks); PII scan skipped, CI will enforce it" >&2
+fi

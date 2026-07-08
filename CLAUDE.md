@@ -1,6 +1,8 @@
+@AGENTS.md
+
 # Household assistant
 
-This project integrates the [YNAB MCP server](https://github.com/calebl/ynab-mcp-server) so Claude can read and manage YNAB budgets.
+This project integrates the [YNAB MCP server](https://github.com/calebl/ynab-mcp-server) so Claude can read and manage YNAB budgets. `AGENTS.md` (imported above) carries the shared workflow contract: structure, commands, commit and PR conventions. Everything below is Claude-specific operating guidance.
 
 ## Personal data vault (optional)
 
@@ -81,7 +83,7 @@ Read the page, don't photograph it. Image screenshots cost far more tokens than 
 
 - **Never put real personal or household values in any committed file** (source, docs, `README`, `CLAUDE.md`, examples, and especially skill `SKILL.md` files and their `description` frontmatter, which is where a personal email once leaked). Banned values include: real personal names, personal email addresses, phone numbers, street or mailing addresses, account numbers or last-4, SSNs and tax IDs, YNAB budget ids and API tokens, Drive file or folder ids, personal filesystem or vault paths, and any household-specific fact.
 - **Use placeholders instead**: `you@example.com`, `<your account>`, `FOLDER_ID`, `YOUR_BUDGET_ID`, `/path/to/vault`. Real values live only where git never sees them: the gitignored `.claude/settings.local.json`, `~/.claude.json`, the Google Drive vault and its `conventions.md`, and auto-memory.
-- **Scan the staged diff before every commit.** Run `git diff --cached` and check for an email address (`grep -nE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'`), for Drive-id-shaped strings, and for known household names or paths. If anything matches, stop and replace it with a placeholder before committing.
+- **Every commit and PR is scanned for PII.** The husky pre-commit hook runs gitleaks over the staged diff with the committed shape rules (`.gitleaks.toml`: emails, UUIDs, Drive ids, `/Users` paths, SSN/phone/address shapes) plus the household denylist in `.gitleaks.local.toml` (gitignored; template in `.gitleaks.local.example.toml`; mirrored into the `PII_DENYLIST_TOML` repository secret). CI re-runs the same scan on every PR (`.github/workflows/pii.yml`): diff contents, full tree, commit messages, and PR title/body, always with `--redact` because public-repo logs are world-readable. If the hook or CI flags a finding, stop and replace the value with a placeholder; for a deliberate documentation example, add a config allowlist entry or an inline `gitleaks:allow` comment. If gitleaks is not installed locally (`brew install gitleaks`), fall back to a manual `git diff --cached` review for emails, ids, and household names before committing.
 - **If personal data has already been committed**, do not just delete it in a new commit. Scrub it from history (`git filter-repo` or `filter-branch`), then force-push, and rebase or retire any local branches that still carry it in their ancestry.
 
 ## Writing conventions

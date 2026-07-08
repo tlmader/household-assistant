@@ -2,10 +2,46 @@
   "name": "household-assistant",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "YNAB-backed household finance assistant for Claude Code",
   "license": "MIT",
-  "author": "Ted Mader <2181467+tlmader@users.noreply.github.com>",
+  "author": {
+    "name": "Ted Mader",
+    "email": "2181467+tlmader@users.noreply.github.com"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "env:setup": "pnpm install",
+    "clean": "bash scripts/clean.sh",
+    "commit": "git-cz",
+    "commit:retry": "git-cz --retry",
+    "commitlint": "commitlint",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
+    "skills:install": "pnpm dlx skills@latest experimental_install --yes"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-customizable"
+    },
+    "cz-customizable": {
+      "config": "commitizen.config.json"
+    }
+  },
   "dependencies": {
     "ynab-mcp-server": "github:calebl/ynab-mcp-server#36634cf98bdbea6c86dd237f1b048a51310559b4"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "commitizen": "^4.3.1",
+    "cz-customizable": "^7.5.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "markdownlint-cli2": "^0.14.0"
   }
 }
