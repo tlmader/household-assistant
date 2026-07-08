@@ -86,6 +86,8 @@ The finance skills give estimates, not tax or financial advice. Check anything t
 
 Claude reads, summarizes, categorizes, and creates *unapproved* transactions. It does not approve, update, delete, import, or bulk-approve transactions, edit category budgets, or move money — you do that yourself, even though the YNAB server exposes tools for all of them. Headings and filenames use sentence case; proper nouns keep their casing.
 
+Development follows the [Patina Project baseline](https://github.com/patinaproject/skills): commits and PR titles use `type: #123 short description` (enforced by husky + commitlint locally and CI on every PR), and [AGENTS.md](AGENTS.md) carries the shared workflow contract. Run `pnpm install` once to wire the hooks.
+
 ## Personal data vault (optional)
 
 Point Claude at a curated source of truth by setting `PERSONAL_VAULT_PATH`. A vault is a folder of markdown notes, one structured note per entity (account, policy, asset, loan, trip, tax return). When set, Claude reads the vault first for finance and records questions, and refreshes it from the underlying sources (YNAB, portals) when a note goes stale. See [CLAUDE.md](CLAUDE.md) for the full data surface the skills build on.
@@ -118,7 +120,7 @@ The skill **never sends email and never deletes**: its only writes are creating 
 
 ## Layout
 
-```
+```text
 .claude/skills/         finance, Google Workspace (gws-*), and productivity skills
 mcp-servers/
   wave/                 in-repo read-only Wave GraphQL server
