@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint markdown
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

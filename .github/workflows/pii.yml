@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   scan:
-    name: Scan
+    name: Scan PII
     runs-on: ubuntu-latest
     env:
       GITLEAKS_VERSION: 8.30.1
