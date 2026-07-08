@@ -21,7 +21,7 @@ All scans run with `--redact`: a finding reports the rule, file, and line but ne
 ## Before you publish a fork
 
 - Run `git status` and confirm no local data file (a vault export, a `logs/` file, `settings.local.json`) is staged. A blanket `git add -A` can stage anything not gitignored.
-- Keep secrets out of commits. If a token ever lands in a commit, rotate it — removing the file in a later commit does not remove it from history.
+- Keep secrets out of commits. If a token ever lands in a commit, rotate it; removing the file in a later commit does not remove it from history.
 - The MCP servers write request logs to `logs/`, which can contain live budget data. That directory is gitignored, but clear it before zipping or sharing the working folder.
 
 ## Reporting a problem
