@@ -283,11 +283,41 @@
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "computedHash": "5d0f81e38abe6b984e1feaa731927de5291d040982106ac513cf54ec240e00ec"
     },
+    "install-skills": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/install-skills/SKILL.md",
+      "computedHash": "246aeabc66c7373544851c26af52c7068d3d7d528d989781fa116d6651301d65"
+    },
+    "new-branch": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/new-branch/SKILL.md",
+      "computedHash": "c530e3d555047d434246949946f14949f5ff6484faf0069a50a82394dea43d8e"
+    },
+    "scaffold-repository": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scaffold-repository/SKILL.md",
+      "computedHash": "cc3868e3c3d0a03cd3364959594a05f6c28e0684227dc1593b38c8ba406499eb"
+    },
     "teach": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/productivity/teach/SKILL.md",
       "computedHash": "9cd31ea42b40915ea5fd3949ed229b217d1dfad07dd93d9b0db771dcdd6a6c8a"
+    },
+    "using-github": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/using-github/SKILL.md",
+      "computedHash": "45db24969f4041d14d85e9218660a4760335bc1633e8d4d51e008861d7bb6713"
+    },
+    "working-on-github-issue": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/working-on-github-issue/SKILL.md",
+      "computedHash": "df935df73d309f718101cc704e9343772be4a595459f4a894ce5b68c83bcb874"
     },
     "writing-clearly-and-concisely": {
       "source": "obra/the-elements-of-style",
