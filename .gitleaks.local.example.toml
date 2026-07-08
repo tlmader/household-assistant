@@ -19,6 +19,13 @@ id = "household-name"
 description = "Household name or distinctive household word"
 regex = '''(?i)\b(SURNAME|SPOUSE_FIRST_NAME|DISTINCTIVE_BUDGET_NAME|BUILDING_NAME)\b'''
 
+# If the repo is openly attributed to the author and the author's name would
+# otherwise trip the household-name rule, allowlist it in the metadata files
+# only, so it stays blocked in skill docs, descriptions, and examples.
+[[rules.allowlists]]
+description = "Author attribution in LICENSE and package.json"
+paths = ['''^LICENSE$''', '''^package\.json$''']
+
 # Household email addresses (also caught by the generic email rule; listed
 # literally so commit-message and PR-body scans flag them by name).
 [[rules]]
