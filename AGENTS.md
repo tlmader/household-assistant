@@ -20,23 +20,25 @@ Use GitHub issues as the durable design record. Do not commit design or plan art
 - `pnpm skills:install`: re-vendor locked skills from `skills-lock.json` via the upstream skills CLI, then commit the refreshed overlays. Manual maintenance command, not an install hook.
 - `pnpm clean`: remove `node_modules` and transient install files; never prunes committed skill overlays.
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto `origin/main`, then `pnpm env:setup`); wired into the Claude `SessionStart` hook and the Codex `[setup]` block.
-- `pnpm commit`: guided conventional commit with issue tagging.
+- `pnpm commit`: guided conventional commit.
 - `pnpm lint:md`: lint tracked Markdown (vendored skill directories are excluded).
 
 ## Commit and pull request guidelines
 
-Commits use conventional commit types, no scopes, and a required GitHub issue tag, with the subject capped at 72 characters:
+Commits use conventional commit types, no scopes, with the subject capped at 72 characters:
 
-`type: #123 short description`
+`type: short description`
 
 Examples:
 
-- `feat: #12 add subscription audit skill`
-- `docs: #17 clarify SnapTrade setup`
+- `feat: add subscription audit skill`
+- `docs: clarify SnapTrade setup`
+
+A GitHub issue tag is optional. When a commit or PR does complete an issue, prepend the reference so the link is preserved (`feat: #12 add subscription audit skill`); nothing enforces it.
 
 Start the description with a lowercase word; keep proper nouns capitalized (`YNAB`, `SnapTrade`, `Patina`, `AGENTS.md`). commitlint leaves subject case unenforced precisely so proper nouns are allowed, so this is a convention the hook does not check.
 
-PR titles use the same format so squash commits reuse them verbatim. Fill in `.github/pull_request_template.md` as written: a closing keyword (`Closes #<issue>`) is required, `What changed` states each change and why, and `Testing steps` appears only for human-owned behavior or artifact checks. GitHub Checks are the source of truth for routine automated verification; do not paste passing command output into PR bodies.
+PR titles use the same format so squash commits reuse them verbatim. Fill in `.github/pull_request_template.md` as written: `What changed` states each change and why, `Testing steps` appears only for human-owned behavior or artifact checks, and a closing keyword (`Closes #<issue>`) is optional, added only when the PR completes an issue. GitHub Checks are the source of truth for routine automated verification; do not paste passing command output into PR bodies.
 
 Issue titles stay plain-language, with no commit-style prefix.
 

@@ -77,6 +77,16 @@ Skills live in two places by design. **`.agents/skills/<name>/` is canonical**: 
 
 Read the page, don't photograph it. Image screenshots cost far more tokens than text, so inspect a browser or app through its text or accessibility layer first: Chrome via `get_page_text` or `read_page`, Preview via `preview_snapshot`, Maestro via `inspect_screen`. Take a screenshot only when a visual is the only way to answer, for example when the rendered layout or an image itself is the question and no text extraction can supply it.
 
+### Opening a specific Chrome profile
+
+When a task needs a particular Google account, launch Chrome against that account's on-disk profile directory instead of trusting whatever window is focused. With several profile windows open, `open`, `open -a "Google Chrome"`, and any tool that attaches to "the current window" all follow the last-focused window, so they can land on the wrong account. A wanted account that shows up as a signed-out secondary account is a wrong-profile signal, not a real logout: do not act on it.
+
+- **Launch by directory, not by name.** `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --profile-directory="<dir>" "<url>"`, where `<dir>` is the on-disk profile directory (`Default`, `Profile 1`, ...), not the display name or email.
+- **Resolve account to directory from `Local State`.** Key on the stable account, since directory order and display names change: read `~/Library/Application Support/Google/Chrome/Local State`, `profile.info_cache`, and match each directory to its `user_name`. Re-derive this map each session rather than trusting cached directory numbers.
+- **Verify before any consequential click.** A correct launch flips `profile.last_used` (same `Local State` file) to `<dir>`. Confirm both `last_used == <dir>` and the on-page signed-in account before proceeding. If the profile is genuinely signed out, ask the account owner to sign in; never continue under a different account.
+
+The directory-to-account mapping is machine- and person-specific, so it lives in operator memory (or a local, gitignored note), never in this repo. Do not commit real profile directories, account emails, or a per-machine profile map here.
+
 ## Repository hygiene: never commit personal data
 
 **This repository is public. Committing personal or household data is a hard error, not a style issue.** The offending data must never enter a commit in the first place, because a later "delete" commit does not remove it: git history and the remote keep it forever, and scrubbing then costs a full history rewrite and force-push.

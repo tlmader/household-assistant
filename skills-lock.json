@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "finish-pr": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/finish-pr/SKILL.md",
+      "computedHash": "40df6da2b0a75d28f61c31bff7ba7d09318a69c489c66d41b9b7e7287875ee82"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -306,6 +312,12 @@
       "sourceType": "github",
       "skillPath": "skills/productivity/teach/SKILL.md",
       "computedHash": "9cd31ea42b40915ea5fd3949ed229b217d1dfad07dd93d9b0db771dcdd6a6c8a"
+    },
+    "update-branch": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/update-branch/SKILL.md",
+      "computedHash": "a02d8ed5fc6e4ff6fbad535101cd9a5c7c739bbd0979275e08aba15aef45c8d8"
     },
     "using-github": {
       "source": "patinaproject/skills",
