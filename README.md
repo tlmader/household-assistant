@@ -12,7 +12,9 @@ Treat it as a reference, not a product. Read the code, keep what fits, replace t
 
 ## Setup
 
-You need [Node](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/), and a YNAB account. Run these from the repo root.
+**The guided path:** run `pnpm install`, launch Claude Code, and say *"set up my household assistant"*. The `household-assistant-onboarding` skill walks you through everything below one question at a time, verifies each connector as it goes, and treats every integration as optional. Re-run it anytime to check what's working. The manual steps below stay canonical for anyone setting up by hand.
+
+You need [Node](https://nodejs.org/) 24+, [pnpm](https://pnpm.io/), and a YNAB account. Run these from the repo root.
 
 1. Install dependencies:
 
@@ -55,7 +57,9 @@ One server covers the whole YNAB surface the skills depend on. `ynab_budget_summ
 
 ## Skills
 
-Claude invokes most skills on its own when your request matches. They fall into four groups.
+Claude invokes most skills on its own when your request matches. They fall into five groups.
+
+**Setup (1)**: `household-assistant-onboarding`, written for this repo. It is an interactive setup guide and health check for every connector. It probes what's already configured, resumes at the first incomplete step, treats every integration as optional, and never asks you to paste a secret into chat. Say "set up my household assistant" to start or "check my setup" to diagnose.
 
 **Finance (12)** — adapted from [`openaccountant/skills`](https://github.com/openaccountant/skills) (`personal/`) and rewired to run on YNAB. Each falls back to a manual procedure when YNAB can't supply the data.
 
@@ -101,7 +105,7 @@ Either way, the note format is the same: YAML frontmatter for structured fields,
 
 ## Set up inbox triage
 
-Inbox triage reads and drafts in one Gmail mailbox and keeps a small knowledge base of your preferences outside the repo. It builds on the `gws-*` Google Workspace skills, so set those up first.
+Inbox triage reads and drafts in one Gmail mailbox and keeps a small knowledge base of your preferences outside the repo. It builds on the `gws-*` Google Workspace skills, so set those up first. The `household-assistant-onboarding` skill offers to run this setup as its final step; the steps below are the same flow by hand.
 
 1. **Install and authenticate the `gws` CLI** as the mailbox owner, per the [googleworkspace/cli](https://github.com/googleworkspace/cli) install instructions (`gws auth login`). The skills use `gws`, not the Gmail MCP connector, which in this project authenticates as a different account and returns the wrong mailbox.
 
@@ -121,7 +125,7 @@ The skill **never sends email and never deletes**: its only writes are creating 
 ## Layout
 
 ```text
-.claude/skills/         finance, Google Workspace (gws-*), and productivity skills
+.claude/skills/         setup, finance, Google Workspace (gws-*), and productivity skills
 mcp-servers/
   wave/                 in-repo read-only Wave GraphQL server
 .mcp.json               registers the three MCP servers
