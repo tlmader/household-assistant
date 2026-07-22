@@ -17,7 +17,9 @@ Run once (or re-run when business or priorities change). Interview the user abou
 
 ## Workspace location
 
-The knowledge base holds personal preferences (voice, blocklist, trackers) and must **not** be committed to this repository. It lives at `${INBOX_TRIAGE_WORKSPACE}/Email/`, where `INBOX_TRIAGE_WORKSPACE` is set in `~/.claude.json` (never committed), the same pattern this project uses for `PERSONAL_VAULT_PATH`. If the variable is unset, default to `~/.household-assistant/inbox-triage` and tell the user where the files were written.
+The knowledge base holds personal preferences (voice, blocklist, trackers) and must **not** be committed to this repository. It lives at `${INBOX_TRIAGE_WORKSPACE}/Email/`, where `INBOX_TRIAGE_WORKSPACE` is set in `.claude/settings.local.json` or `~/.claude.json` (never committed), the same pattern this project uses for `PERSONAL_VAULT_PATH`.
+
+Point `INBOX_TRIAGE_WORKSPACE` at an `Inbox Triage` folder in your **own** Google Drive (never the shared household vault), reached through a local Drive for Desktop mount so these scripts write plain files while Drive keeps the sync and backup. The folder is Obsidian-compatible. A plain local path still works. If the variable is unset, default to `~/.household-assistant/inbox-triage` and tell the user where the files were written.
 
 The inbox this KB serves is the Gmail account the `gws` CLI is authenticated as, accessed by `inbox-triage` through `gws` (not the Gmail MCP connector, which may read the wrong account). This skill itself only writes local files; it does not touch the mailbox.
 
