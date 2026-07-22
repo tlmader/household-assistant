@@ -109,18 +109,20 @@ Inbox triage reads and drafts in one Gmail mailbox and keeps a small knowledge b
 
 1. **Install and authenticate the `gws` CLI** as the mailbox owner, per the [googleworkspace/cli](https://github.com/googleworkspace/cli) install instructions (`gws auth login`). The skills use `gws`, not the Gmail MCP connector, which in this project authenticates as a different account and returns the wrong mailbox.
 
-2. **(Optional) Choose where the knowledge base lives.** It holds personal preferences (categories, voice, blocklist, trackers) and must stay out of git. Set `INBOX_TRIAGE_WORKSPACE` in `.claude/settings.local.json` or your shell; it defaults to `~/.household-assistant/inbox-triage`.
+2. **Choose where the knowledge base lives.** It holds personal preferences (categories, voice, blocklist, trackers) and must stay out of git. Keep it in a synced folder you control, **not** the shared vault. The recommended home is an `Inbox Triage` folder in your own Google Drive, reached through a local Drive for Desktop mount so the files stay editable (and openable as an Obsidian vault) while Drive keeps the backup. Set `INBOX_TRIAGE_WORKSPACE` to that folder in `.claude/settings.local.json` (gitignored) or your shell; a plain local path works too, and it defaults to `~/.household-assistant/inbox-triage` if unset.
 
    ```jsonc
-   // .claude/settings.local.json
-   { "env": { "INBOX_TRIAGE_WORKSPACE": "…" } }
+   // .claude/settings.local.json — point at your own Drive folder, never the shared vault
+   { "env": { "INBOX_TRIAGE_WORKSPACE": "/path/to/Google Drive/My Drive/Inbox Triage" } }
    ```
+
+   The knowledge base is written to `$INBOX_TRIAGE_WORKSPACE/Email/`, so the `Inbox Triage` folder holds an `Email/` subfolder with the files.
 
 3. **Run `inbox-setup` once.** Ask Claude "set up inbox triage". It walks an interview (one question at a time) about your categories, reply voice, blocklist, and open threads, and writes a 7-file knowledge base to `$INBOX_TRIAGE_WORKSPACE/Email/`. It reads your real inbox and sent mail to ground the taxonomy and calibrate your voice; it does not touch the mailbox otherwise.
 
 4. **Run `inbox-triage`.** Ask "triage my inbox" (or schedule it). It classifies recent mail against your taxonomy, drafts replies for anything that needs one, delivers your report in the format you chose, and updates the knowledge base. Re-run `inbox-setup` anytime your priorities change.
 
-The skill **never sends email and never deletes**: its only writes are creating Gmail drafts for you to review and updating the local knowledge base. First runs need oversight while the voice and taxonomy settle.
+The skill **never sends email and never deletes**: its only writes are creating Gmail drafts for you to review and updating your knowledge base. First runs need oversight while the voice and taxonomy settle.
 
 ## Layout
 

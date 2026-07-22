@@ -23,7 +23,9 @@ The upstream skill was provider-agnostic (Gmail / Outlook / IMAP MCP). This port
 
 ## Workspace and knowledge base location
 
-The knowledge base holds personal preferences (voice, blocklist, trackers) and must **not** be committed to this repository. It lives at `${INBOX_TRIAGE_WORKSPACE}/Email/`, where `INBOX_TRIAGE_WORKSPACE` is set in `~/.claude.json` (never committed), the same pattern this project uses for `PERSONAL_VAULT_PATH`. If the variable is unset, default to `~/.household-assistant/inbox-triage`.
+The knowledge base holds personal preferences (voice, blocklist, trackers) and must **not** be committed to this repository. It lives at `${INBOX_TRIAGE_WORKSPACE}/Email/`, where `INBOX_TRIAGE_WORKSPACE` is set in `.claude/settings.local.json` or `~/.claude.json` (never committed), the same pattern this project uses for `PERSONAL_VAULT_PATH`.
+
+Point `INBOX_TRIAGE_WORKSPACE` at an `Inbox Triage` folder in your **own** Google Drive (never the shared household vault), reached through a local Drive for Desktop mount so the KB scripts read plain files while Drive keeps the sync and backup. That folder is Obsidian-compatible: open it as a vault if you prefer. A plain local path still works. If the variable is unset, default to `~/.household-assistant/inbox-triage`.
 
 ## Invocation triggers
 
